@@ -31,23 +31,24 @@ endGame = False
 class Cell(object):
 
     def __init__(self,x,y,w):
+        self.i = x
+        self.j = y
         self.x = x*w
         self.y = y*w
         self.w = w
         self.bomb = False
-        self.revealed = True
+        self.revealed = False
         self.color = (127,127,127)
-        self.cellID = ""
         self.touching = 0
 
-    def getTouching(self,x,y,gridd):
+    def getTouching(self,gridd):
         if self.bomb == True:
             return -1
         total = 0
-        for i in range(-1,1):
-            for j in range(-1,1):
-                a = i + x
-                b = j + y
+        for i in range(-1,2):
+            for j in range(-1,2):
+                a = i + self.i
+                b = j + self.j
                 if a > -1 and a < rows and b > -1 and b < cols:
                     neighbor = gridd[a][b]
                     if neighbor.bomb == True:
@@ -93,14 +94,15 @@ def drawGrid(grid):
                 if grid[i][j].bomb == True:
                     gameDisplay.blit(bombImg, (grid[i][j].x, grid[i][j].y))
                 if grid[i][j].bomb == False:
-                    gameDisplay.blit(myfont.render(str(grid[i][j].touching), True, (255,0,0)), (grid[i][j].x+15, grid[i][j].y))
+                    if(grid[i][j].touching > 0):
+                        gameDisplay.blit(myfont.render(str(grid[i][j].touching), True, (255,0,0)), (grid[i][j].x+15, grid[i][j].y))
                     pass
 
 grid = make2DArray(rows,cols)
 
 for i in range(len(grid)):
     for j in range(len(grid[i])):
-        grid[i][j].getTouching(j,i,grid)
+        grid[i][j].getTouching(grid)
 
 drawGrid(grid)
 
