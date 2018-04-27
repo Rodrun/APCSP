@@ -49,3 +49,21 @@ class Cell:
                     if neighbor.bomb == True:
                         total = total + 1
         self.touching = total
+        
+    def showSurrounding(self, gridd): #NOT YET TESTED
+        """
+        For all of the surrounding cells, change revealed to true.
+        Only called when the self.touching == 0.
+
+        Arguments:
+        gridd - Parent grid.
+        """
+        
+        for i in range(-1,2):
+            for j in range(-1,2):
+                a = i + self.i
+                b = j + self.j
+                if a > -1 and a < self.rows and b > -1 and b < self.cols:
+                    neighbor = gridd[a][b]
+                    neighbor.revealed = True
+        print("All surrounding cells revealed.")
