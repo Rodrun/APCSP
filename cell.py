@@ -66,4 +66,6 @@ class Cell:
                 if a > -1 and a < self.rows and b > -1 and b < self.cols:
                     neighbor = gridd[a][b]
                     neighbor.revealed = True
+                    if neighbor.touching == 0: #NOT TESTED
+                        neighbor.showSurrounding() #NOT TESTED
         print("All surrounding cells revealed.")
