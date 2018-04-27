@@ -134,6 +134,8 @@ while not endGame:
                             bomb = True
                         else:
                             print("Touching: ", cell.touching)
+                            if cell.touching == 0: #NOT TESTED
+                                cell.showSurrounding(grid) #NOT TESTED
             print("Bomb clicked: ", bomb)
 
     pygame.display.update()
