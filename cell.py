@@ -79,20 +79,20 @@ class Cell:
             else:
                 pygame.draw.rect(gameDisplay, self.color, [
                                 self.x, self.y, self.w-1, self.w-1])
-                if(self.touching > 0):
+                if self.touching > 0:
                     gameDisplay.blit(myfont.render(str(self.touching),
                                     True,
                                     (255, 0, 0)),
                                     (self.x+15, self.y))
+                if self.touching == 0:
+                    self.showSurrounding()
 
             self.actDebounce = True
 
-    def showSurrounding(self, gridd): #NOT YET TESTED
+    def showSurrounding(self): #NOT YET TESTED
         """
-        For all of the surrounding cells, change revealed to true.
+        For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
-        Arguments:
-        gridd - Parent grid.
         """
         
         for i in range(-1,2):
@@ -100,8 +100,6 @@ class Cell:
                 a = i + self.i
                 b = j + self.j
                 if a > -1 and a < self.rows and b > -1 and b < self.cols:
-                    neighbor = gridd[a][b]
-                    neighbor.revealed = True
-                    if neighbor.touching == 0: #NOT TESTED
-                        neighbor.showSurrounding() #NOT TESTED
+                    #DEFINE NEIGHBOR SOMEHOW
+                    neighbor.action()
         print("All surrounding cells revealed.")
