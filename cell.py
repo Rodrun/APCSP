@@ -1,6 +1,23 @@
 """Grid cell object.
 """
 
+import pygame
+from pygame.locals import *
+
+bombImg = pygame.image.load("bomb.jpg")
+bombImg = pygame.transform.scale(bombImg, (50, 50)) #Change 50s to scale later
+
+gameDisplay = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Minesweeper")
+
+pygame.font.init()
+
+if not pygame.font:
+    print("Warning, fonts disabled")
+else:
+    myfont = pygame.font.SysFont("Comic Sans MS", 30)
+if not pygame.mixer:
+    print("Warning, sound disabled")
 
 # TODO: derive from pygame.sprite.Sprite
 class Cell:
@@ -25,15 +42,14 @@ class Cell:
         self.touching = 0
         self.rows = rows
         self.cols = cols
+        self.actDebounce = False
 
     def getTouching(self, gridd):
         """
         Get the total amount of touching bomb cells and assign to object
         member 'touching'.
-
         Arguments:
         gridd - Parent grid.
-
         Returns:
         -1 if bomb, otherwise None.
         """
@@ -49,12 +65,32 @@ class Cell:
                     if neighbor.bomb == True:
                         total = total + 1
         self.touching = total
-        
+
+    def action(self):
+        """
+        Draw over the current image for the cell with the new information.
+        """
+        if self.actDebounce == False:
+            self.color = (90, 90, 90)
+            self.revealed = True
+
+            if self.bomb == True:
+                gameDisplay.blit(bombImg, (self.x, self.y))
+            else:
+                pygame.draw.rect(gameDisplay, self.color, [
+                                self.x, self.y, self.w-1, self.w-1])
+                if(self.touching > 0):
+                    gameDisplay.blit(myfont.render(str(self.touching),
+                                    True,
+                                    (255, 0, 0)),
+                                    (self.x+15, self.y))
+
+            self.actDebounce = True
+
     def showSurrounding(self, gridd): #NOT YET TESTED
         """
         For all of the surrounding cells, change revealed to true.
         Only called when the self.touching == 0.
-
         Arguments:
         gridd - Parent grid.
         """
