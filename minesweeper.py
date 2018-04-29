@@ -22,14 +22,24 @@ bombImg = pygame.transform.scale(bombImg, (w, w))
 
 endGame = False
 
-# Generate grid
-grid = Grid(rows,cols)
-# Count adjacent bombs
-for i in range(len(grid.array)):
-    for j in range(len(grid.array[i])):
-        grid.array[i][j].getTouching(grid.array)
+class Minesweeper(object):
+    def __init__(self,rows,cols,w):
+        self.rows = rows
+        self.cols = cols
+        self.w = w
+        self.grid = Grid(rows,cols)
 
-grid.drawGrid()
+        for i in range(len(self.grid.array)):
+            for j in range(len(self.grid.array[i])):
+                self.grid.array[i][j].getTouching(self.grid.array)
+        
+    
+    def drawGrid(self):
+        self.grid.drawGrid()
+
+minesweeper = Minesweeper(rows,cols,w)
+
+minesweeper.drawGrid()
 
 while not endGame:
     for event in pygame.event.get():
@@ -40,9 +50,9 @@ while not endGame:
         if event.type == pygame.MOUSEBUTTONUP:
             bomb = False
             # print(event.pos)
-            for i in range(len(grid.array)):
-                for j in range(len(grid.array[i])):
-                    cell = grid.array[i][j]
+            for i in range(len(minesweeper.grid.array)):
+                for j in range(len(minesweeper.grid.array[i])):
+                    cell = minesweeper.grid.array[i][j]
                     if event.pos[0] > cell.x \
                         and event.pos[0] < cell.x + w \
                         and event.pos[1] > cell.y \

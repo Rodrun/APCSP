@@ -8,29 +8,8 @@ from pygame.locals import *  # Preferably don't wildcard import
 from cell import Cell
 from random import randint
 
-# bombImg = pygame.image.load("bomb.jpg")
-# bombImg = pygame.transform.scale(bombImg, (50, 50)) #Change 50s to scale later
-
 gameDisplay = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Minesweeper")
-
-# pygame.font.init()
-
-# if not pygame.font:
-#     print("Warning, fonts disabled")
-# else:
-#     myfont = pygame.font.SysFont("Comic Sans MS", 30)
-# if not pygame.mixer:
-#     print("Warning, sound disabled")
-
-def getNeighbors(cell,grid,rows,cols):
-            for a in range(-1,2):
-                for b in range(-1,2):
-                    c = cell.i + a
-                    d = cell.j + b
-                    if c > -1 and c < rows and d > -1 and d < cols:
-                        neighbor = grid[c][d]
-                        grid[cell.i][cell.j].surrounding.insert(0, neighbor)
 
 
 class Grid(object):
@@ -54,7 +33,7 @@ class Grid(object):
                     self.array[i][j].bomb = True
         for i in range(len(self.array)):
             for j in range(len(self.array[j])):
-                getNeighbors(self.array[i][j], self.array, rows, cols)
+                self.getNeighbors(self.array[i][j], self.array, rows, cols)
         
         
                 
@@ -73,3 +52,12 @@ class Grid(object):
                 #                             True,
                 #                             (255, 0, 0)),
                 #                             (cell.x+15, cell.y))
+    
+    def getNeighbors(self,cell,grid,rows,cols):
+            for a in range(-1,2):
+                for b in range(-1,2):
+                    c = cell.i + a
+                    d = cell.j + b
+                    if c > -1 and c < rows and d > -1 and d < cols:
+                        neighbor = grid[c][d]
+                        grid[cell.i][cell.j].surrounding.insert(0, neighbor)
