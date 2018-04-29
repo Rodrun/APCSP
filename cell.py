@@ -95,7 +95,7 @@ class Cell:
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
         """
-        for i in range(len(self.surrounding)):
+        for i in range(len(self.surrounding)-1):
             neighbor = self.surrounding[i]
             neighbor.action()
         print("All surrounding cells revealed.")
