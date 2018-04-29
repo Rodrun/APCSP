@@ -90,7 +90,7 @@ class Cell:
                     self.showSurrounding()
 
 
-    def showSurrounding(self): #ERRORS
+    def showSurrounding(self):
         """
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
