@@ -23,6 +23,16 @@ pygame.display.set_caption("Minesweeper")
 # if not pygame.mixer:
 #     print("Warning, sound disabled")
 
+def getNeighbors(cell,grid,rows,cols):
+            for a in range(-1,2):
+                for b in range(-1,2):
+                    c = cell.i + a
+                    d = cell.j + b
+                    if c > -1 and c < rows and d > -1 and d < cols:
+                        neighbor = grid[c][d]
+                        grid[cell.i][cell.j].surrounding.insert(0, neighbor)
+
+
 class Grid(object):
 
     def __init__(self,rows,cols):
@@ -42,15 +52,12 @@ class Grid(object):
                 # print(ri)
                 if ri == 1:
                     self.array[i][j].bomb = True
-                else:
-                    for a in range(-1,2):
-                        for b in range(-1,2):
-                            c = i + a
-                            d = j + b
-                            if c > -1 and c < rows and d > -1 and d < cols:
-                                neighbor = self.array[c][d]
-                                self.array[i][j].surrounding.insert(0, neighbor)
+        for i in range(len(self.array)):
+            for j in range(len(self.array[j])):
+                getNeighbors(self.array[i][j], self.array, rows, cols)
         
+        
+                
     def drawGrid(self):
         for i in range(len(self.array)):
             for j in range(len(self.array[i])):
