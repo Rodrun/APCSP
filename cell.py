@@ -43,7 +43,8 @@ class Cell:
         self.rows = rows
         self.cols = cols
         self.actDebounce = False
-        self.surrounding = []
+        self.surrounding = []'
+        self.tagged = False
 
     def getTouching(self, gridd):
         """
