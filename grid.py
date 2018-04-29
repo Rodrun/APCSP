@@ -42,6 +42,14 @@ class Grid(object):
                 # print(ri)
                 if ri == 1:
                     self.array[i][j].bomb = True
+                else:
+                    for a in range(-1,2):
+                        for b in range(-1,2):
+                            c = i + a
+                            d = j + b
+                            if c > -1 and c < rows and d > -1 and d < cols:
+                                neighbor = self.array[c][d]
+                                self.array[i][j].surrounding.insert(0, neighbor)
         
     def drawGrid(self):
         for i in range(len(self.array)):
