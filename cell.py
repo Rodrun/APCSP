@@ -43,6 +43,7 @@ class Cell:
         self.rows = rows
         self.cols = cols
         self.actDebounce = False
+        self.surrounding = []
 
     def getTouching(self, gridd):
         """
@@ -89,17 +90,12 @@ class Cell:
 
             self.actDebounce = True
 
-    def showSurrounding(self): #NOT YET TESTED
+    def showSurrounding(self): #ERRORS
         """
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
         """
-        
-        for i in range(-1,2):
-            for j in range(-1,2):
-                a = i + self.i
-                b = j + self.j
-                if a > -1 and a < self.rows and b > -1 and b < self.cols:
-                    #DEFINE NEIGHBOR SOMEHOW
-                    neighbor.action()
+        for i in self.surrounding:
+            neighbor = self.surrounding[i]
+            neighbor.action()
         print("All surrounding cells revealed.")
