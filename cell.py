@@ -72,6 +72,7 @@ class Cell:
         Draw over the current image for the cell with the new information.
         """
         if self.actDebounce == False:
+            self.actDebounce = True
             self.color = (90, 90, 90)
             self.revealed = True
 
@@ -88,14 +89,12 @@ class Cell:
                 if self.touching == 0:
                     self.showSurrounding()
 
-            self.actDebounce = True
 
     def showSurrounding(self): #ERRORS
         """
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
         """
-        for i in range(len(self.surrounding)-1):
+        for i in range(len(self.surrounding)):
             neighbor = self.surrounding[i]
             neighbor.action()
-        print("All surrounding cells revealed.")
