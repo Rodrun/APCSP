@@ -84,7 +84,7 @@ class Minesweeper(object):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == LEFT:
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 # TODO: Do this more efficiently
                 for i in range(len(minesweeper.grid.array)):
                     for j in range(len(minesweeper.grid.array[i])):
