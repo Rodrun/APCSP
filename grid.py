@@ -1,63 +1,99 @@
 """
 Grid Object
 """
-
 import pygame
-from pygame.locals import *  # Preferably don't wildcard import
 
 from cell import Cell
 from random import randint
 
-gameDisplay = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Minesweeper")
 
+class Grid(pygame.sprite.Group):
 
-class Grid(object):
+    bomb_img = None  # Bomb image
+    font = None  # Cell font
 
-    def __init__(self,rows,cols):
+    def __init__(self, rows, cols, w=50, bomb_chance=4):
         """
         Generate a 2D list of safe and bomb cells.
+
         Arguments:
         rows - Number of rows.
         cols - Number of columns.
-        w = 50
+        w - Width of a cell.
+        bomb_chance - Chance of a cell being a bomb.
         """
+        super().__init__()
+        self.rows = rows
+        self.cols = cols
+
+        Cell.bomb_img = Grid.bomb_img
+        Cell.font = Grid.font
+        Cell.cover_img = Grid.cover_img
+        Cell.uncover_img = Grid.uncover_img
+
+        # Create grid
         self.array = [[None for i in range(cols)] for j in range(rows)]
-        for i in range(len(self.array)):
-            for j in range(len(self.array[i])):
-                w = 50
-                self.array[i][j] = Cell(i, j, w)
-                ri = randint(0, 4)
-                # print(ri)
-                if ri == 1:
-                    self.array[i][j].bomb = True
-        for i in range(len(self.array)):
-            for j in range(len(self.array[j])):
-                self.getNeighbors(self.array[i][j], self.array, rows, cols)
-        
-        
-                
-    def drawGrid(self):
-        for i in range(len(self.array)):
-            for j in range(len(self.array[i])):
-                cell = self.array[i][j]
-                pygame.draw.rect(gameDisplay, cell.color, [
-                                cell.x, cell.y, cell.w-1, cell.w-1])
-                # if cell.revealed == True:
-                #     if cell.bomb == True:
-                #         gameDisplay.blit(bombImg, (cell.x, cell.y))
-                #     if cell.bomb == False:
-                #         if(cell.touching > 0):
-                #             gameDisplay.blit(myfont.render(str(cell.touching),
-                #                             True,
-                #                             (255, 0, 0)),
-                #                             (cell.x+15, cell.y))
-    
-    def getNeighbors(self,cell,grid,rows,cols):
-            for a in range(-1,2):
-                for b in range(-1,2):
-                    c = cell.i + a
-                    d = cell.j + b
-                    if c > -1 and c < rows and d > -1 and d < cols:
-                        neighbor = grid[c][d]
-                        grid[cell.i][cell.j].surrounding.insert(0, neighbor)
+        for i in range(self.rows):
+            for j in range(self.cols):
+                # Determine if bomb
+                bomb = True if randint(0, bomb_chance) == 1 else False
+                # Create cell
+                self.array[i][j] = Cell(bomb, i, j, w)
+
+        for i in range(self.rows):
+            for j in range(self.cols):
+                current = self.at(i, j)
+                self.get_neighbors(current)
+                self.set_touching(current)
+                self.add(current)  # Add to group
+
+    def get_neighbors(self, cell):
+        """
+        Add neighboring cells for the cell.surrounding list.
+
+        Arguments:
+        cell - Cell to detect neighbors with.
+        """
+        for a in range(-1, 2):
+            for b in range(-1, 2):
+                c = cell.i + a
+                d = cell.j + b
+                if c > -1 and c < self.rows and d > -1 and d < self.cols:
+                    # neighbor = grid[c][d]
+                    # grid[cell.i][cell.j].surrounding.insert(0, neighbor)
+                    neighbor = self.at(c, d)
+                    self.at(cell.i, cell.j).surrounding.insert(0, neighbor)
+
+    def at(self, i, j):
+        """
+        Get cell at (i, j).
+
+        Arguments:
+        i - X index.
+        j - Y index.
+        """
+        return self.array[i][j]
+
+    def set_touching(self, c: Cell):
+        """
+        Get the total amount of touching bomb cells and assign to cell
+        member 'touching'.
+
+        Arguments:
+        c - Cell to use.
+
+        Returns:
+        -1 if bomb, otherwise None.
+        """
+        if c.bomb:
+            return -1
+        total = 0
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                a = i + c.i
+                b = j + c.j
+                if a > -1 and a < self.rows and b > -1 and b < self.cols:
+                    neighbor = self.array[a][b]
+                    if neighbor.bomb:
+                        total = total + 1
+        c.touching = total

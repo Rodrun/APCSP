@@ -1,101 +1,99 @@
 """Grid cell object.
 """
+import copy
 
 import pygame
-from pygame.locals import *
 
-bombImg = pygame.image.load("bomb.jpg")
-bombImg = pygame.transform.scale(bombImg, (50, 50)) #Change 50s to scale later
 
-gameDisplay = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Minesweeper")
+class Cell(pygame.sprite.Sprite):
 
-pygame.font.init()
+    bomb_img = None  # Bomb image
+    cover_img = None  # Unclicked image
+    uncover_img = None  # Revealed image
+    font = None  # Font to display # touching bombs
 
-if not pygame.font:
-    print("Warning, fonts disabled")
-else:
-    myfont = pygame.font.SysFont("Comic Sans MS", 30)
-if not pygame.mixer:
-    print("Warning, sound disabled")
-
-# TODO: derive from pygame.sprite.Sprite
-class Cell:
-
-    def __init__(self, x, y, w, rows=9, cols=9):
+    def __init__(self, bomb, x, y, w, rows=9, cols=9):
         """
         Arguments:
+        bomb - Is bomb?
         x - X coordinate.
         y - Y coordinate.
         w - Width of cell.
         rows - Rows of parent grid.
         cols - Columns of parent grid.
         """
+        super().__init__()
         self.i = x
         self.j = y
-        self.x = x*w
-        self.y = y*w
+        self.x = x * w
+        self.y = y * w
         self.w = w
-        self.bomb = False
+        self._set_image(Cell.cover_img)
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+        self.bomb = bomb
         self.revealed = False
-        self.color = (127,127,127)
         self.touching = 0
         self.rows = rows
         self.cols = cols
         self.actDebounce = False
-        self.surrounding = []'
+        self.surrounding = []
         self.tagged = False
+        self.rendered_text = False  # To prevent Font.render() multiple times
 
-    def getTouching(self, gridd):
+    def update(self):
+        if self.revealed:
+            if self.bomb:
+                self._set_image(Cell.bomb_img)
+            else:
+                if not self.rendered_text:  # Create text image only once
+                    self._set_image(Cell.uncover_img)
+                    text = Cell.font.render(str(self.touching),
+                                            True,
+                                            (255, 0, 0))
+                    self.image.blit(text, (self.w * .3, self.w * .1))
+                    self.rendered_text = True
+
+    def get_summary(self):
         """
-        Get the total amount of touching bomb cells and assign to object
-        member 'touching'.
-        Arguments:
-        gridd - Parent grid.
+        Get a brief summary about the cell.
+
         Returns:
-        -1 if bomb, otherwise None.
+        Summary string.
         """
-        if self.bomb == True:
-            return -1
-        total = 0
-        for i in range(-1,2):
-            for j in range(-1,2):
-                a = i + self.i
-                b = j + self.j
-                if a > -1 and a < self.rows and b > -1 and b < self.cols:
-                    neighbor = gridd[a][b]
-                    if neighbor.bomb == True:
-                        total = total + 1
-        self.touching = total
+        return "Cell {}: bomb={}, revealed={}, touching={}".format(
+            (self.i, self.j),
+            self.bomb,
+            self.revealed,
+            self.touching)
+
+    def _set_image(self, im):
+        """
+        Set the current image by copy.
+
+        Arguments:
+        im - Image surface.
+        """
+        self.image = copy.copy(im)
 
     def action(self):
         """
         Draw over the current image for the cell with the new information.
         """
-        if self.actDebounce == False:
+        if not self.actDebounce:
             self.actDebounce = True
             self.color = (90, 90, 90)
             self.revealed = True
-
-            if self.bomb == True:
-                gameDisplay.blit(bombImg, (self.x, self.y))
-            else:
-                pygame.draw.rect(gameDisplay, self.color, [
-                                self.x, self.y, self.w-1, self.w-1])
-                if self.touching > 0:
-                    gameDisplay.blit(myfont.render(str(self.touching),
-                                    True,
-                                    (255, 0, 0)),
-                                    (self.x+15, self.y))
-                if self.touching == 0:
-                    self.showSurrounding()
-
+            self.showSurrounding()  # Only if touching = 0
+            # print(self.get_summary())
 
     def showSurrounding(self):
         """
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
         """
-        for i in range(len(self.surrounding)):
-            neighbor = self.surrounding[i]
-            neighbor.action()
+        if self.touching == 0 and not self.bomb:
+            for neighbor in self.surrounding:
+                neighbor.action()
