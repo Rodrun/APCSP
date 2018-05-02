@@ -61,7 +61,7 @@ class Minesweeper(object):
         Grid.cover_img = cover_img
 #         flag_img = pygame.image.load(flag_path)
 #         flag_img = pygame.transform.scale(flag_img, (w,w))
-#         grid.flag_img = flag_img
+#         Grid.flag_img = flag_img
         
         
 
