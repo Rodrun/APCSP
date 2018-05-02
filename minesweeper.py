@@ -17,7 +17,7 @@ class Minesweeper(object):
 
     def __init__(self, rows, cols, w, font=None, font_ratio=0.6,
                  dwidth=800, dheight=600, fit=False, bomb_path="bomb.png",
-                 uncover_path="cell_uncover.png", cover_path="cell_cover.png",
+                 uncover_path="cell_uncover.png", cover_path="cell_cover.png", #flag_path="flag.png"
                  bomb_chance=4):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
@@ -34,6 +34,7 @@ class Minesweeper(object):
         bomb_path - Path to bomb image.
         uncover_path - Path to uncovered cell image.
         cover_path - Path to covered cell image.
+        flag_path - Path to flag image.
         bomb_chance - Chance of a cell being a bomb. 4 would be 25%.
         """
         self.rows = rows
@@ -58,6 +59,11 @@ class Minesweeper(object):
         cover_img = pygame.image.load(cover_path)
         cover_img = pygame.transform.scale(cover_img, (w, w))
         Grid.cover_img = cover_img
+#         flag_img = pygame.image.load(flag_path)
+#         flag_img = pygame.transform.scale(flag_img, (w,w))
+#         grid.flag_img = flag_img
+        
+        
 
         # Init grid
         self.grid = Grid(rows, cols, w, bomb_chance)
