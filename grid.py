@@ -30,6 +30,7 @@ class Grid(pygame.sprite.Group):
         Cell.font = Grid.font
         Cell.cover_img = Grid.cover_img
         Cell.uncover_img = Grid.uncover_img
+#         Cell.flag_img = Grid.flag_img
 
         # Create grid
         self.array = [[None for i in range(cols)] for j in range(rows)]
