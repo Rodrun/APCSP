@@ -17,7 +17,7 @@ class Minesweeper(object):
 
     def __init__(self, rows, cols, w, font=None, font_ratio=0.6,
                  dwidth=800, dheight=600, fit=False, bomb_path="bomb.png",
-                 uncover_path="cell_uncover.png", cover_path="cell_cover.png", #flag_path="flag.png"
+                 uncover_path="cell_uncover.png", cover_path="cell_cover.png", flag_path="flag.png",
                  bomb_chance=4):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
