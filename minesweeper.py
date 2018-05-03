@@ -94,6 +94,15 @@ class Minesweeper(object):
                                 and event.pos[1] > cell.y \
                                 and event.pos[1] < cell.y + w:
                             cell.action()
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+                for i in range(len(minesweeper.grid.array)):
+                    for j in range(len(minesweeper.grid.array[i])):
+                        cell = minesweeper.grid.array[i][j]
+                        if event.pos[0] > cell.x \
+                                and event.pos[0] < cell.x + w \
+                                and event.pos[1] > cell.y \ 
+                                and event.pos[1] < cell.y + w:
+                            #cell.flag()
         self.grid.update()
         return True
 
