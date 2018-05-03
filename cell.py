@@ -35,6 +35,7 @@ class Cell(pygame.sprite.Sprite):
 
         self.bomb = bomb
         self.revealed = False
+        self.flagged = False
         self.touching = 0
         self.rows = rows
         self.cols = cols
@@ -55,6 +56,8 @@ class Cell(pygame.sprite.Sprite):
                                             (255, 0, 0))
                     self.image.blit(text, (self.w * .3, self.w * .1))
                     self.rendered_text = True
+         elif not self.revealed and self.flagged:
+            #Render flag image over the cell
 
     def get_summary(self):
         """
@@ -88,6 +91,14 @@ class Cell(pygame.sprite.Sprite):
             self.revealed = True
             self.showSurrounding()  # Only if touching = 0
             # print(self.get_summary())
+    
+    def flag(self):
+        """
+        Add the flag image over the cell if it is flagged.
+        Remove flag image from the cell if it is being un-flagged.
+        """
+        self.flagged = not self.flagged
+            
 
     def showSurrounding(self):
         """
