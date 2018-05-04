@@ -102,7 +102,7 @@ class Minesweeper(object):
                                 and event.pos[0] < cell.x + w \
                                 and event.pos[1] > cell.y \ 
                                 and event.pos[1] < cell.y + w:
-                            #cell.flag()
+                           cell.flag()
         self.grid.update()
         return True
 
