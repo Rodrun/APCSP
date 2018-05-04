@@ -66,11 +66,12 @@ class Cell(pygame.sprite.Sprite):
         Returns:
         Summary string.
         """
-        return "Cell {}: bomb={}, revealed={}, touching={}".format(
+        return "Cell {}: bomb={}, revealed={}, touching={}, flagged={}".format(
             (self.i, self.j),
             self.bomb,
             self.revealed,
-            self.touching)
+            self.touching,
+            self.flagged)
 
     def _set_image(self, im):
         """
@@ -85,7 +86,7 @@ class Cell(pygame.sprite.Sprite):
         """
         Draw over the current image for the cell with the new information.
         """
-        if not self.actDebounce:
+        if not self.actDebounce and not self.flagged:
             self.actDebounce = True
             self.color = (90, 90, 90)
             self.revealed = True
