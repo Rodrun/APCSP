@@ -6,7 +6,7 @@ import argparse
 
 import pygame
 
-# from cell import Cell
+import util
 from grid import Grid
 
 
@@ -17,8 +17,8 @@ class Minesweeper(object):
 
     def __init__(self, rows, cols, w, font=None, font_ratio=0.6,
                  dwidth=800, dheight=600, fit=False, bomb_path="bomb.png",
-                 uncover_path="cell_uncover.png", cover_path="cell_cover.png", flag_path="flag.png",
-                 bomb_chance=4):
+                 uncover_path="cell_uncover.png", cover_path="cell_cover.png",
+                 flag_path="flag.png", bomb_limit=10, bomb_chance=4):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
         Arguments:
@@ -34,6 +34,7 @@ class Minesweeper(object):
         uncover_path - Path to uncovered cell image.
         cover_path - Path to covered cell image.
         flag_path - Path to flag image.
+        bomb_limit - Maximum amount of bombs allowed.
         bomb_chance - Chance of a cell being a bomb. 4 would be 25%.
         """
         self.rows = rows
@@ -42,6 +43,7 @@ class Minesweeper(object):
 
         pygame.init()
         pygame.display.set_caption("Minesweeper")
+        pygame.display.set_icon(util.load_scaled("icon.png", (32, 32)))
 
         # Load shared resources
         Grid.font = font
@@ -49,28 +51,18 @@ class Minesweeper(object):
             Grid.font = pygame.font.SysFont(Minesweeper.DEFAULT,
                                             int(w * font_ratio))
 
-        bomb_img = pygame.image.load(bomb_path)
-        bomb_img = pygame.transform.scale(bomb_img, (w, w))
-        Grid.bomb_img = bomb_img
-        uncover_img = pygame.image.load(uncover_path)
-        uncover_img = pygame.transform.scale(uncover_img, (w, w))
-        Grid.uncover_img = uncover_img
-        cover_img = pygame.image.load(cover_path)
-        cover_img = pygame.transform.scale(cover_img, (w, w))
-        Grid.cover_img = cover_img
-        flag_img = pygame.image.load(flag_path)
-        flag_img = pygame.transform.scale(flag_img, (w-12,w-12))
-        Grid.flag_img = flag_img
-        
-        
+        Grid.bomb_img = util.load_scaled(bomb_path, (w, w))
+        Grid.uncover_img = util.load_scaled(uncover_path, (w, w))
+        Grid.cover_img = util.load_scaled(cover_path, (w, w))
+        Grid.flag_img = util.load_scaled(flag_path, (w - 12, w - 12))
 
         # Init grid
-        self.grid = Grid(rows, cols, w, bomb_chance)
+        self.grid = Grid(rows, cols, w, bomb_chance, bomb_limit)
 
         if fit:
             dwidth = rows * w
             dheight = cols * w
-        print("Display dim: ", (dwidth, dheight))
+
         self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
 
     def update(self) -> bool:
@@ -83,7 +75,6 @@ class Minesweeper(object):
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONUP:
-                # TODO: Do this more efficiently
                 for i in range(len(minesweeper.grid.array)):
                     for j in range(len(minesweeper.grid.array[i])):
                         cell = minesweeper.grid.array[i][j]
@@ -104,9 +95,6 @@ class Minesweeper(object):
         """
         pygame.quit()
 
-    # def drawGrid(self):
-    #     self.grid.drawGrid()
-
     def draw(self):
         """
         Draw the grid.
@@ -120,6 +108,9 @@ class Minesweeper(object):
         To be determined in the near future... TODO
         """
         self.grid.at(i, j).action()
+
+    def reset(self):
+        pass  # TODO: Start working on this
 
 
 # If file run as script, e.g. python minesweeper.py
@@ -150,6 +141,10 @@ if __name__ == "__main__":
                         type=int,
                         default=4,
                         help="set bomb_chance")
+    parser.add_argument("--bombs",
+                        type=int,
+                        default=10,
+                        help="set bomb_limit")
     args = parser.parse_args()
     ROWS = args.griddim[0]
     COLS = args.griddim[1]
@@ -159,7 +154,8 @@ if __name__ == "__main__":
                               fit=args.no_fit,
                               dwidth=args.width,
                               dheight=args.height,
-                              bomb_chance=args.chance)
+                              bomb_chance=args.chance,
+                              bomb_limit=args.bombs)
 
     minesweeper.draw()
 
