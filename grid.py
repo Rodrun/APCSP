@@ -15,7 +15,6 @@ class Grid(pygame.sprite.Group):
     def __init__(self, rows, cols, w=50, bomb_chance=4):
         """
         Generate a 2D list of safe and bomb cells.
-
         Arguments:
         rows - Number of rows.
         cols - Number of columns.
@@ -41,7 +40,8 @@ class Grid(pygame.sprite.Group):
                 bomb = True if randint(0, bomb_chance) == 1 else False
                 # Create cell
                 self.array[i][j] = Cell(bomb, i, j, w)
-                self.total_bombs = self.total_bombs + 1 if bomb == True 
+                if bomb == True:
+                    self.total_bombs = self.total_bombs + 1
 
         for i in range(self.rows):
             for j in range(self.cols):
@@ -53,7 +53,6 @@ class Grid(pygame.sprite.Group):
     def get_neighbors(self, cell):
         """
         Add neighboring cells for the cell.surrounding list.
-
         Arguments:
         cell - Cell to detect neighbors with.
         """
@@ -70,7 +69,6 @@ class Grid(pygame.sprite.Group):
     def at(self, i, j):
         """
         Get cell at (i, j).
-
         Arguments:
         i - X index.
         j - Y index.
@@ -81,10 +79,8 @@ class Grid(pygame.sprite.Group):
         """
         Get the total amount of touching bomb cells and assign to cell
         member 'touching'.
-
         Arguments:
         c - Cell to use.
-
         Returns:
         -1 if bomb, otherwise None.
         """
