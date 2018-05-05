@@ -82,7 +82,7 @@ class Minesweeper(object):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 # TODO: Do this more efficiently
                 for i in range(len(minesweeper.grid.array)):
                     for j in range(len(minesweeper.grid.array[i])):
@@ -91,16 +91,10 @@ class Minesweeper(object):
                                 and event.pos[0] < cell.x + w \
                                 and event.pos[1] > cell.y \
                                 and event.pos[1] < cell.y + w:
-                            cell.action()
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-                for i in range(len(minesweeper.grid.array)):
-                    for j in range(len(minesweeper.grid.array[i])):
-                        cell = minesweeper.grid.array[i][j]
-                        if event.pos[0] > cell.x \
-                                and event.pos[0] < cell.x + w \
-                                and event.pos[1] > cell.y \
-                                and event.pos[1] < cell.y + w:
-                           cell.flag()
+                            if event.button == 1:
+                                cell.action()
+                            elif event.button == 3:
+                                cell.flag()
         self.grid.update()
         return True
 
