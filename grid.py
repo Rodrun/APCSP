@@ -12,7 +12,7 @@ class Grid(pygame.sprite.Group):
     bomb_img = None  # Bomb image
     font = None  # Cell font
 
-    def __init__(self, rows, cols, w=50, bomb_chance=4):
+    def __init__(self, rows, cols, w=50, bomb_chance=4, bomb_limit=10):
         """
         Generate a 2D list of safe and bomb cells.
         Arguments:
@@ -40,7 +40,7 @@ class Grid(pygame.sprite.Group):
                 bomb = True if randint(0, bomb_chance) == 1 else False
                 # Create cell
                 self.array[i][j] = Cell(bomb, i, j, w)
-                if bomb == True:
+                if bomb is True:
                     self.total_bombs = self.total_bombs + 1
 
         for i in range(self.rows):
