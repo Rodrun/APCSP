@@ -21,7 +21,6 @@ class Minesweeper(object):
                  bomb_chance=4):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
-
         Arguments:
         rows - Number of rows.
         cols - Number of columns.
@@ -60,7 +59,7 @@ class Minesweeper(object):
         cover_img = pygame.transform.scale(cover_img, (w, w))
         Grid.cover_img = cover_img
         flag_img = pygame.image.load(flag_path)
-        flag_img = pygame.transform.scale(flag_img, (w,w))
+        flag_img = pygame.transform.scale(flag_img, (w-12,w-12))
         Grid.flag_img = flag_img
         
         
@@ -77,7 +76,6 @@ class Minesweeper(object):
     def update(self) -> bool:
         """
         Perform default logical updates for the game.
-
         Returns:
         False if pygame.QUIT is recieved, True otherwise.
         """
@@ -100,7 +98,7 @@ class Minesweeper(object):
                         cell = minesweeper.grid.array[i][j]
                         if event.pos[0] > cell.x \
                                 and event.pos[0] < cell.x + w \
-                                and event.pos[1] > cell.y \ 
+                                and event.pos[1] > cell.y \
                                 and event.pos[1] < cell.y + w:
                            cell.flag()
         self.grid.update()
@@ -124,7 +122,6 @@ class Minesweeper(object):
     def click_cell(self, i, j):
         """
         Call an action at cell (i, j).
-
         Returns:
         To be determined in the near future... TODO
         """
