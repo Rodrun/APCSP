@@ -56,10 +56,9 @@ class Cell(pygame.sprite.Sprite):
                                                 True,
                                                 (255, 0, 0))
                     else:
-                        text = Cell.font.render("",
-                                                True,
-                                                (255, 0, 0))
-                    self.image.blit(text, (self.w * .3, self.w * .1))
+                        text = None
+                    if text is not None:
+                        self.image.blit(text, (self.w * .3, self.w * .1))
                     self.rendered_text = True
         elif not self.revealed and self.flagged:
             self._set_image(Cell.flag_img)
@@ -97,14 +96,13 @@ class Cell(pygame.sprite.Sprite):
             self.revealed = True
             self.showSurrounding()  # Only if touching = 0
             # print(self.get_summary())
-    
+
     def flag(self):
         """
         Add the flag image over the cell if it is flagged.
         Remove flag image from the cell if it is being un-flagged.
         """
         self.flagged = not self.flagged
-            
 
     def showSurrounding(self):
         """
