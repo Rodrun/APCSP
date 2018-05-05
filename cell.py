@@ -51,18 +51,24 @@ class Cell(pygame.sprite.Sprite):
             else:
                 if not self.rendered_text:  # Create text image only once
                     self._set_image(Cell.uncover_img)
-                    text = Cell.font.render(str(self.touching),
-                                            True,
-                                            (255, 0, 0))
+                    if self.touching != 0:
+                        text = Cell.font.render(str(self.touching),
+                                                True,
+                                                (255, 0, 0))
+                    else:
+                        text = Cell.font.render("",
+                                                True,
+                                                (255, 0, 0))
                     self.image.blit(text, (self.w * .3, self.w * .1))
                     self.rendered_text = True
-         elif not self.revealed and self.flagged:
-            #Render flag image over the cell
+        elif not self.revealed and self.flagged:
+            self._set_image(Cell.flag_img)
+        else:
+            self._set_image(Cell.cover_img)
 
     def get_summary(self):
         """
         Get a brief summary about the cell.
-
         Returns:
         Summary string.
         """
@@ -76,7 +82,6 @@ class Cell(pygame.sprite.Sprite):
     def _set_image(self, im):
         """
         Set the current image by copy.
-
         Arguments:
         im - Image surface.
         """
