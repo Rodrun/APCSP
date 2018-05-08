@@ -109,8 +109,14 @@ class Minesweeper(object):
         """
         self.grid.at(i, j).action()
 
-    def reset(self):
-        pass  # TODO: Start working on this
+    def reset(self): #TODO: Finish working on this
+        self.grid = Grid(self.rows, self.cols, self.w, 4, 10)
+        
+        if fit:
+            dwidth = self.rows * w
+            dheight = self.cols * w
+
+        self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
 
 
 # If file run as script, e.g. python minesweeper.py
