@@ -18,7 +18,7 @@ class Minesweeper(object):
     def __init__(self, rows, cols, w, font=None, font_ratio=0.6,
                  dwidth=800, dheight=600, fit=False, bomb_path="bomb.png",
                  uncover_path="cell_uncover.png", cover_path="cell_cover.png",
-                 flag_path="flag.png", bomb_limit=10, bomb_chance=4):
+                 flag_path="flag.png", bomb_chance=4, bomb_limit=10):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
         Arguments:
@@ -115,7 +115,7 @@ class Minesweeper(object):
         """
         Creates a new Grid object to be used when game is reset.
         """
-        self.grid = Grid(self.rows, self.cols, self.w, 4, 10)
+        self.grid = Grid(self.rows, self.cols, self.w, bomb_chance=4, bomb_limit=10)
         self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
 
 
