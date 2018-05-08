@@ -116,8 +116,6 @@ class Minesweeper(object):
         Creates a new Grid object to be used when game is reset.
         """
         self.grid = Grid(self.rows, self.cols, self.w, bomb_chance=4, bomb_limit=10)
-        self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
-
 
 # If file run as script, e.g. python minesweeper.py
 if __name__ == "__main__":
