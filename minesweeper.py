@@ -84,6 +84,8 @@ class Minesweeper(object):
                                 and event.pos[1] < cell.y + w:
                             if event.button == 1:
                                 cell.action()
+                                if cell.bomb:
+                                    self.reset()
                             elif event.button == 3:
                                 cell.flag()
         self.grid.update()
