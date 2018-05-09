@@ -24,7 +24,8 @@ class Grid(pygame.sprite.Group):
         super().__init__()
         self.rows = rows
         self.cols = cols
-        self.total_bombs = 0
+        self.total_bombs = bomb_limit
+        self.bombs = []
 
         Cell.bomb_img = Grid.bomb_img
         Cell.font = Grid.font
@@ -37,11 +38,23 @@ class Grid(pygame.sprite.Group):
         for i in range(self.rows):
             for j in range(self.cols):
                 # Determine if bomb
-                bomb = True if randint(0, bomb_chance) == 1 else False
+                ####bomb = True if randint(0, bomb_chance) == 1 else False
                 # Create cell
                 self.array[i][j] = Cell(bomb, i, j, w)
-                if bomb is True:
-                    self.total_bombs = self.total_bombs + 1
+                ####if bomb is True:
+                    ####self.total_bombs = self.total_bombs + 1
+                    
+        #Declaring the bombs
+        for a in range(bomb_limit):
+            bomb_row = randint(0,self.rows)
+            bomb_col = randint(0,self.cols)
+            for i in range(self.bombs):
+                if self.bombs[i] is not (bomb_row,bomb_col):
+                    self.array[bomb_row][bomb_col].bomb = True
+                    self.bombs.insert(0, (bomb_row,bomb_col))
+                else:
+                    a -= 1
+            
 
         for i in range(self.rows):
             for j in range(self.cols):
