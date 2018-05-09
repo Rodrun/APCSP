@@ -12,7 +12,7 @@ class Cell(pygame.sprite.Sprite):
     uncover_img = None  # Revealed image
     font = None  # Font to display # touching bombs
 
-    def __init__(self, bomb, x, y, w, rows=9, cols=9):
+    def __init__(self, x, y, w, rows=9, cols=9):
         """
         Arguments:
         bomb - Is bomb?
@@ -33,7 +33,7 @@ class Cell(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-        self.bomb = bomb
+        self.bomb = False
         self.revealed = False
         self.flagged = False
         self.touching = 0
