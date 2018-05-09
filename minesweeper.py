@@ -36,10 +36,12 @@ class Minesweeper(object):
         flag_path - Path to flag image.
         bomb_limit - Maximum amount of bombs allowed.
         bomb_chance - Chance of a cell being a bomb. 4 would be 25%.
+        remaining - The remaining cells that need to be cleared in order to win.
         """
         self.rows = rows
         self.cols = cols
         self.w = w
+        self.remaining = (rows*cols) - bomb_limit
 
         pygame.init()
         pygame.display.set_caption("Minesweeper")
@@ -85,7 +87,12 @@ class Minesweeper(object):
                             if event.button == 1:
                                 cell.action()
                                 if cell.bomb:
+                                    #TODO: Add losing system
                                     self.reset()
+                                else:
+                                    self.remaining -= 1
+                                if self.remaining <= 0:
+                                    print("GAME WON")
                             elif event.button == 3:
                                 cell.flag()
         self.grid.update()
