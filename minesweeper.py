@@ -36,12 +36,14 @@ class Minesweeper(object):
         flag_path - Path to flag image.
         bomb_limit - Maximum amount of bombs allowed.
         bomb_chance - Chance of a cell being a bomb. 4 would be 25%.
-        remaining - The remaining cells that need to be cleared in order to win.
+        remaining - The remaining cells that need to be cleared.
         """
         self.rows = rows
         self.cols = cols
         self.w = w
-        self.remaining = (rows*cols) - bomb_limit
+        self.remaining = (rows * cols) - bomb_limit
+        self.lost = False  # Track win/loss state
+        self.after_click = []  # List of callbacks to invoke after a click
 
         pygame.init()
         pygame.display.set_caption("Minesweeper")
@@ -87,8 +89,7 @@ class Minesweeper(object):
                             if event.button == 1:
                                 cell.action()
                                 if cell.bomb:
-                                    #TODO: Add losing system
-                                    self.reset()
+                                    self.lost = True
                                 else:
                                     self.remaining -= 1
                                 if self.remaining <= 0:
@@ -110,19 +111,54 @@ class Minesweeper(object):
         """
         self.grid.draw(self.gameDisplay)
 
+    def on_end(self, cb: list, reset=True):
+        """
+        Invoke callbacks on end of game. End of game is when either a bomb was
+        clicked on (loss), or no more unrevealed cells remain (win).
+        Arguments:
+        cb - List of callbacks to invoke in order.
+        reset - Reset automatically after invoking callbacks?
+        """
+        # Calls
+        for callback in cb:
+            callback(self.remaining)
+        if reset:
+            self.reset()
+
     def click_cell(self, i, j):
         """
         Call an action at cell (i, j).
         Returns:
-        To be determined in the near future... TODO
+        Generator of integer values of the grid after action.
         """
         self.grid.at(i, j).action()
+        return self.get_grid_vals()
 
-    def reset(self): #TODO: Finish working on this
+    def reset(self):  # TODO: Finish working on this
         """
         Creates a new Grid object to be used when game is reset.
         """
-        self.grid = Grid(self.rows, self.cols, self.w, bomb_chance=4, bomb_limit=10)
+        self.grid = Grid(self.rows, self.cols, self.w,
+                         bomb_chance=self.bomb_chance,
+                         bomb_limit=self.bomb_limit)
+
+    def get_grid_vals(self):
+        """
+        Get a grid value generator to feed to the network.
+        Returns:
+        Generator of integer values of the grid.
+        """
+        for c in self.grid:
+            yield c.value
+
+    def set_click_callable(self, cb: list):
+        """
+        Set the list of callbacks to call after a cell click.
+        Arguments:
+        cb - List of callbacks.
+        """
+        self.after_click = cb
+
 
 # If file run as script, e.g. python minesweeper.py
 if __name__ == "__main__":
