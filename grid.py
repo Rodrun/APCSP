@@ -33,28 +33,26 @@ class Grid(pygame.sprite.Group):
         Cell.uncover_img = Grid.uncover_img
         Cell.flag_img = Grid.flag_img
 
+        # Generate random bomb coordinates
+        if bomb_limit <= rows * cols:
+            bomb_tuples = set()
+            remaining = bomb_limit
+            while remaining != 0:
+                tx = randint(0, cols)
+                ty = randint(0, rows)
+                coord = self._coord_str(tx, ty)
+                # Avoid duplicates
+                if coord not in bomb_tuples:
+                    bomb_tuples.add(self._coord_str(tx, ty))
+                    remaining -= 1
+
         # Create grid
         self.array = [[None for i in range(cols)] for j in range(rows)]
         for i in range(self.rows):
             for j in range(self.cols):
-                # Determine if bomb
-                ####bomb = True if randint(0, bomb_chance) == 1 else False
-                # Create cell
-                self.array[i][j] = Cell(bomb, i, j, w)
-                ####if bomb is True:
-                    ####self.total_bombs = self.total_bombs + 1
-                    
-        #Declaring the bombs
-        for a in range(bomb_limit):
-            bomb_row = randint(0,self.rows)
-            bomb_col = randint(0,self.cols)
-            for i in range(self.bombs):
-                if self.bombs[i] is not (bomb_row,bomb_col):
-                    self.array[bomb_row][bomb_col].bomb = True
-                    self.bombs.insert(0, (bomb_row,bomb_col))
-                else:
-                    a -= 1
-            
+                scoord = self._coord_str(i, j)
+                self.array[i][j] = Cell(i, j, w,
+                                        bomb=scoord in bomb_tuples)
 
         for i in range(self.rows):
             for j in range(self.cols):
@@ -62,6 +60,17 @@ class Grid(pygame.sprite.Group):
                 self.get_neighbors(current)
                 self.set_touching(current)
                 self.add(current)  # Add to group
+
+    def _coord_str(self, x, y):
+        """
+        Convert coordinate into a string.
+        Arguments:
+        x - X coordinate.
+        y - Y coordinate.
+        Returns:
+        Coordinate string.
+        """
+        return ",".join([str(i) for i in [x, y]])
 
     def get_neighbors(self, cell):
         """

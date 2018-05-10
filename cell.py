@@ -12,12 +12,12 @@ class Cell(pygame.sprite.Sprite):
     uncover_img = None  # Revealed image
     font = None  # Font to display # touching bombs
 
-    def __init__(self, x, y, w, rows=9, cols=9):
+    def __init__(self, x, y, w, bomb=False, rows=9, cols=9):
         """
         Arguments:
         bomb - Is bomb?
-        x - X coordinate.
-        y - Y coordinate.
+        x - X location in grid.
+        y - Y location in grid.
         w - Width of cell.
         rows - Rows of parent grid.
         cols - Columns of parent grid.
@@ -33,7 +33,7 @@ class Cell(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-        self.bomb = False
+        self.bomb = bomb
         self.revealed = False
         self.flagged = False
         self.touching = 0
@@ -43,6 +43,7 @@ class Cell(pygame.sprite.Sprite):
         self.surrounding = []
         self.tagged = False
         self.rendered_text = False  # To prevent Font.render() multiple times
+        # print(self.get_summary())
 
     def update(self):
         if self.revealed:
@@ -64,6 +65,18 @@ class Cell(pygame.sprite.Sprite):
             self._set_image(Cell.flag_img)
         else:
             self._set_image(Cell.cover_img)
+
+    def get_value(self):
+        """
+        Get the integer value of the cell.
+        Returns:
+        Touching bomb count if revealed, otherwise -1.
+        NOTE: Bomb cells return -1 as well!
+        """
+        if self.revealed:
+            return self.touching
+        else:
+            return -1
 
     def get_summary(self):
         """
