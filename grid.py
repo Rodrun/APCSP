@@ -25,6 +25,7 @@ class Grid(pygame.sprite.Group):
         self.rows = rows
         self.cols = cols
         self.total_bombs = bomb_limit
+        self.w = w
         self.bombs = []
 
         Cell.bomb_img = Grid.bomb_img
@@ -51,7 +52,7 @@ class Grid(pygame.sprite.Group):
         for i in range(self.rows):
             for j in range(self.cols):
                 scoord = self._coord_str(i, j)
-                self.array[i][j] = Cell(i, j, w,
+                self.array[i][j] = Cell(i, j, self.w,
                                         bomb=scoord in bomb_tuples)
 
         for i in range(self.rows):
@@ -60,6 +61,16 @@ class Grid(pygame.sprite.Group):
                 self.get_neighbors(current)
                 self.set_touching(current)
                 self.add(current)  # Add to group
+
+    def state_str(self):
+        """
+        Get basic overview information about the current
+        state of the grid.
+        Returns:
+        State string.
+        """
+        return "Grid {}x{}, Bombs: {}, w: {}".format(self.rows, self.cols,
+                                                     self.total_bombs, self.w)
 
     def _coord_str(self, x, y):
         """
