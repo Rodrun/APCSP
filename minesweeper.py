@@ -43,6 +43,8 @@ class Minesweeper(object):
         self.w = w
         self.remaining = (rows * cols) - bomb_limit
         self.lost = False  # Track win/loss state
+        self.end = False  # Indicator of end of game
+        self.end_callbacks = []  # List of callbacks to invoke after game end
         self.after_click = []  # List of callbacks to invoke after a click
 
         pygame.init()
@@ -79,6 +81,7 @@ class Minesweeper(object):
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONUP:
+                # TODO: Find a more efficient manner?
                 for i in range(len(minesweeper.grid.array)):
                     for j in range(len(minesweeper.grid.array[i])):
                         cell = minesweeper.grid.array[i][j]
@@ -89,15 +92,32 @@ class Minesweeper(object):
                             if event.button == 1:
                                 cell.action()
                                 if cell.bomb:
-                                    self.lost = True
+                                    self.end(True)
                                 else:
                                     self.remaining -= 1
+
                                 if self.remaining <= 0:
-                                    print("GAME WON")
+                                    self.end(False)
                             elif event.button == 3:
                                 cell.flag()
+                            break
         self.grid.update()
+        if self.win or self.lose:
+            self._invoke_end(self.end_callbacks)
         return True
+
+    def end(self, lost: bool):
+        self.lost = lost
+        self.end = True
+
+    def set_end_callbacks(self, cb: list):
+        """
+        Set the list of callbacks that are invoked at the end of
+        a game.
+        Arguments:
+        cb - Callback list.
+        """
+        self.end_callbacks = cb
 
     def quit(self):
         """
@@ -111,17 +131,18 @@ class Minesweeper(object):
         """
         self.grid.draw(self.gameDisplay)
 
-    def on_end(self, cb: list, reset=True):
+    def _invoke_end(self, cb: list, reset=True):
         """
         Invoke callbacks on end of game. End of game is when either a bomb was
         clicked on (loss), or no more unrevealed cells remain (win).
         Arguments:
-        cb - List of callbacks to invoke in order.
+        cb - List of callbacks to invoke in order. Only parameter is remaining
+             cell count.
         reset - Reset automatically after invoking callbacks?
         """
-        # Calls
         for callback in cb:
             callback(self.remaining)
+
         if reset:
             self.reset()
 
@@ -138,6 +159,7 @@ class Minesweeper(object):
         """
         Creates a new Grid object to be used when game is reset.
         """
+        self.end = False
         self.grid = Grid(self.rows, self.cols, self.w,
                          bomb_chance=self.bomb_chance,
                          bomb_limit=self.bomb_limit)
@@ -203,8 +225,6 @@ if __name__ == "__main__":
                               dheight=args.height,
                               bomb_chance=args.chance,
                               bomb_limit=args.bombs)
-
-    minesweeper.draw()
 
     running = True
     while running:
