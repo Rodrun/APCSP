@@ -45,6 +45,9 @@ class Cell(pygame.sprite.Sprite):
         self.rendered_text = False  # To prevent Font.render() multiple times
         # print(self.get_summary())
 
+    def __repr__(self):
+        self.get_summary()
+
     def update(self):
         if self.revealed:
             if self.bomb:
