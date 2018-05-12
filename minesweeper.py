@@ -46,6 +46,10 @@ class Minesweeper(object):
         self.end = False  # Indicator of end of game
         self.end_callbacks = []  # List of callbacks to invoke after game end
         self.after_click = []  # List of callbacks to invoke after a click
+        self.bomb_chance = bomb_chance
+        self.bomb_limit = bomb_limit
+        self.win = False
+        self.lose = False
 
         pygame.init()
         pygame.display.set_caption("Minesweeper")
@@ -92,23 +96,25 @@ class Minesweeper(object):
                             if event.button == 1:
                                 cell.action()
                                 if cell.bomb:
-                                    self.end(True)
+                                    self.end_game(True)
                                 else:
                                     self.remaining -= 1
 
                                 if self.remaining <= 0:
-                                    self.end(False)
+                                    self.end_game(False)
                             elif event.button == 3:
                                 cell.flag()
                             break
         self.grid.update()
         if self.win or self.lose:
+            print("Invoking end")
             self._invoke_end(self.end_callbacks)
         return True
 
-    def end(self, lost: bool):
+    def end_game(self, lost: bool):
         self.lost = lost
         self.end = True
+        self._invoke_end(self.end_callbacks, reset=True)
 
     def set_end_callbacks(self, cb: list):
         """
