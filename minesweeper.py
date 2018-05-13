@@ -19,7 +19,7 @@ class Minesweeper(object):
                  dwidth=800, dheight=600, fit=False, bomb_path="bomb.png",
                  uncover_path="cell_uncover.png", cover_path="cell_cover.png",
                  flag_path="flag.png", bomb_chance=4, bomb_limit=10,
-                 user_input=True, dbg_reveal=False):
+                 user_input=True, dbg_reveal=False, reveal_dry=True):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
         Arguments:
@@ -40,6 +40,7 @@ class Minesweeper(object):
         remaining - The remaining cells that need to be cleared.
         user_input - Allow user input.
         dbg_reveal - Reveal all cells? Calls _click_all_remaining().
+        reveal_dry - 'dry' parameter for _click_all_remaining().
         """
         self.rows = rows
         self.cols = cols
@@ -74,7 +75,7 @@ class Minesweeper(object):
         # self.grid = Grid(rows, cols, w, bomb_chance, bomb_limit)
         self.reset()
         if dbg_reveal:
-            self.grid.for_each(self._click_all_remaining)
+            self.grid.for_each(self._click_all_remaining, reveal_dry)
 
         if fit:
             dwidth = rows * w
@@ -114,17 +115,18 @@ class Minesweeper(object):
         Returns:
         True until cell is clicked.
         """
+        # Detect if user input allowed
+        if not self.user_input:
+            return False
+
         if event.pos[0] > cell.x \
                 and event.pos[0] < cell.x + self.w \
                 and event.pos[1] > cell.y \
                 and event.pos[1] < cell.y + self.w:
             if event.button == 1:
                 cell.action(self._after_action)
-                if cell.bomb:
+                if cell.bomb and not cell.flagged:
                     self.end_game(True)
-                elif not cell.revealed:
-                    self.remaining -= 1
-                    print("Remaining cells: ", self.remaining)
 
             elif event.button == 3:
                 cell.flag()
@@ -150,14 +152,12 @@ class Minesweeper(object):
         that are not bombs.
         Arguments:
         cell - Cell object.
-        dry - True = game win is desired (remaining count is modified).
+        dry - False = game win is desired (remaining count is modified).
         Returns:
         True for entire loop.
         """
         if not cell.bomb:
-            cell.action(self._after_action)
-        if not dry:
-            self.remaining = 0  # To provoke reset afterwards
+            cell.action(self._after_action if not dry else None)
         return True
 
     def _click_a_bomb(self, cell):
@@ -181,10 +181,10 @@ class Minesweeper(object):
         cell - Cell object action is performed on successfully.
         """
         # print(cell)
-        if not cell.revealed:
+        if not cell.revealed and not cell.flagged:
             self.remaining -= 1
-            print("_after_action remaining: ", self.remaining, " bombs: ",
-                  self.bomb_limit, " total: ", self.grid.get_total_cells())
+            # print("_after_action remaining: ", self.remaining, " bombs: ",
+            #       self.bomb_limit, " total: ", self.grid.get_total_cells())
 
     def end_game(self, lost: bool):
         self.lost = lost
@@ -206,11 +206,13 @@ class Minesweeper(object):
         """
         pygame.quit()
 
-    def draw(self):
+    def draw(self, flip=True):
         """
-        Draw the grid.
+        Draw the grid and optionally flip the display.
         """
         self.grid.draw(self.gameDisplay)
+        if flip:
+            pygame.display.flip()
 
     def _invoke_end(self, cb: list, reset=True):
         """
@@ -236,7 +238,7 @@ class Minesweeper(object):
         self.grid.at(i, j).action(self._after_action)
         return self.get_grid_vals()
 
-    def reset(self):  # TODO: Finish working on this
+    def reset(self):
         """
         Creates a new Grid object to be used when game is reset.
         """
@@ -245,7 +247,8 @@ class Minesweeper(object):
                          bomb_chance=self.bomb_chance,
                          bomb_limit=self.bomb_limit)
         self.remaining = self.get_total_cells() - self.bomb_limit
-        print("Grid reset. Remaining: ", self.remaining, " ", self.grid.state_str())
+        print("Grid reset. Remaining: ", self.remaining, " ",
+              self.grid.state_str())
 
     def get_grid_vals(self):
         """
@@ -254,7 +257,7 @@ class Minesweeper(object):
         Generator of integer values of the grid.
         """
         for c in self.grid:
-            yield c.value
+            yield c.get_value()
 
     def set_click_callbacks(self, cb: list):
         """
@@ -317,6 +320,10 @@ class Minesweeper(object):
         parser.add_argument("--debug-reveal-cells",
                             action="store_true",
                             help="Reveal all non-bomb cells")
+        parser.add_argument("--debug-reveal-no-dry",
+                            action="store_false",
+                            help="Disable dry (no win) reveal when using"
+                                 + "--debug-reveal-cells flag?")
         return parser
 
     @classmethod
@@ -340,7 +347,8 @@ class Minesweeper(object):
                            dheight=args.height,
                            bomb_chance=args.chance,
                            bomb_limit=args.bombs,
-                           dbg_reveal=args.debug_reveal_cells)
+                           dbg_reveal=args.debug_reveal_cells,
+                           reveal_dry=args.debug_reveal_no_dry)
 
 
 # If file run as script, e.g. python minesweeper.py
@@ -351,5 +359,4 @@ if __name__ == "__main__":
     while running:
         running = minesweeper.update()
         minesweeper.draw()
-        pygame.display.flip()
     minesweeper.quit()
