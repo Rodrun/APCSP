@@ -28,6 +28,10 @@ class Grid(pygame.sprite.Group):
         self.w = w
         self.bombs = []
 
+        # Ensure no illegal dimensions
+        assert rows >= 1
+        assert cols >= 1
+
         Cell.bomb_img = Grid.bomb_img
         Cell.font = Grid.font
         Cell.cover_img = Grid.cover_img
@@ -61,6 +65,19 @@ class Grid(pygame.sprite.Group):
                 self.get_neighbors(current)
                 self.set_touching(current)
                 self.add(current)  # Add to group
+
+    def for_each(self, callback, *args):
+        """
+        Call callback on each cell.
+        Arguments:
+        callback - Callback, only argument is the current cell object. False
+                   is returned: will break loop.
+        args - Any additional arguments that the callback may require.
+        """
+        for i in self.array:
+            for j in i:
+                if not callback(j, *args):
+                    break
 
     def state_str(self):
         """

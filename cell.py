@@ -46,7 +46,7 @@ class Cell(pygame.sprite.Sprite):
         # print(self.get_summary())
 
     def __repr__(self):
-        self.get_summary()
+        return self.get_summary()
 
     def update(self):
         if self.revealed:
@@ -102,16 +102,19 @@ class Cell(pygame.sprite.Sprite):
         """
         self.image = copy.copy(im)
 
-    def action(self):
+    def action(self, cb=None):
         """
         Draw over the current image for the cell with the new information.
+        Arguments:
+        cb - Callback if valid click is made. Only argument is cell itself.
         """
         if not self.actDebounce and not self.flagged:
             self.actDebounce = True
-            self.color = (90, 90, 90)
             self.revealed = True
             self.showSurrounding()  # Only if touching = 0
             # print(self.get_summary())
+            if cb is not None:
+                cb(self)
 
     def flag(self):
         """
@@ -120,11 +123,13 @@ class Cell(pygame.sprite.Sprite):
         """
         self.flagged = not self.flagged
 
-    def showSurrounding(self):
+    def showSurrounding(self, cb=None):
         """
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
+        Arguments:
+        cb - Callback that action() recieves.
         """
         if self.touching == 0 and not self.bomb:
             for neighbor in self.surrounding:
-                neighbor.action()
+                neighbor.action(cb)
