@@ -79,7 +79,7 @@ class Cell(pygame.sprite.Sprite):
         if self.revealed:
             return self.touching
         else:
-            return -1
+            return -999
 
     def get_summary(self):
         """

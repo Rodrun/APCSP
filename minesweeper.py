@@ -183,8 +183,8 @@ class Minesweeper(object):
         # print(cell)
         if not cell.revealed and not cell.flagged:
             self.remaining -= 1
-            print("_after_action remaining: ", self.remaining, " bombs: ",
-                  self.bomb_limit, " total: ", self.grid.get_total_cells())
+            # print("_after_action remaining: ", self.remaining, " bombs: ",
+            #       self.bomb_limit, " total: ", self.grid.get_total_cells())
 
     def end_game(self, lost: bool):
         self.lost = lost
@@ -206,11 +206,13 @@ class Minesweeper(object):
         """
         pygame.quit()
 
-    def draw(self):
+    def draw(self, flip=True):
         """
-        Draw the grid.
+        Draw the grid and optionally flip the display.
         """
         self.grid.draw(self.gameDisplay)
+        if flip:
+            pygame.display.flip()
 
     def _invoke_end(self, cb: list, reset=True):
         """
@@ -245,7 +247,8 @@ class Minesweeper(object):
                          bomb_chance=self.bomb_chance,
                          bomb_limit=self.bomb_limit)
         self.remaining = self.get_total_cells() - self.bomb_limit
-        print("Grid reset. Remaining: ", self.remaining, " ", self.grid.state_str())
+        print("Grid reset. Remaining: ", self.remaining, " ",
+              self.grid.state_str())
 
     def get_grid_vals(self):
         """
@@ -254,7 +257,7 @@ class Minesweeper(object):
         Generator of integer values of the grid.
         """
         for c in self.grid:
-            yield c.value
+            yield c.get_value()
 
     def set_click_callbacks(self, cb: list):
         """
@@ -356,5 +359,4 @@ if __name__ == "__main__":
     while running:
         running = minesweeper.update()
         minesweeper.draw()
-        pygame.display.flip()
     minesweeper.quit()
