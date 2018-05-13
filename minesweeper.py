@@ -175,13 +175,9 @@ class Minesweeper(object):
         print("_after_action remaining: ", self.remaining)
 
     def end_game(self, lost: bool):
-        """
-        End the game.
-        Arguments:
-        lost - Lost game?
-        """
         self.lost = lost
         self.end = True
+        self._invoke_end(self.end_callbacks, reset=True)
 
     def set_end_callbacks(self, cb: list):
         """

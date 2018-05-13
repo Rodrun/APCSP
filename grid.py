@@ -43,8 +43,8 @@ class Grid(pygame.sprite.Group):
             bomb_tuples = set()
             remaining = bomb_limit
             while remaining != 0:
-                tx = randint(0, cols)
-                ty = randint(0, rows)
+                tx = randint(0, cols-1)
+                ty = randint(0, rows-1)
                 coord = self._coord_str(tx, ty)
                 # Avoid duplicates
                 if coord not in bomb_tuples:
