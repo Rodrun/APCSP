@@ -41,11 +41,15 @@ class Minesweeper(object):
         self.rows = rows
         self.cols = cols
         self.w = w
+        self.detect_end = True  # Detect for win/loss?
+        self.bomb_chance = bomb_chance
+        self.bomb_limit = bomb_limit
         self.remaining = (rows * cols) - bomb_limit
         self.lost = False  # Track win/loss state
         self.end = False  # Indicator of end of game
         self.end_callbacks = []  # List of callbacks to invoke after game end
         self.after_click = []  # List of callbacks to invoke after a click
+        self.revealed_bombs = 0  # Track revealed bombs, when game ends.
 
         pygame.init()
         pygame.display.set_caption("Minesweeper")
@@ -77,36 +81,105 @@ class Minesweeper(object):
         Returns:
         False if pygame.QUIT is recieved, True otherwise.
         """
+        # Check for game end
+        if self.end:
+            print("Minesweeper end game detected.")
+            self._invoke_end(self.end_callbacks)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONUP:
-                # TODO: Find a more efficient manner?
-                for i in range(len(minesweeper.grid.array)):
-                    for j in range(len(minesweeper.grid.array[i])):
-                        cell = minesweeper.grid.array[i][j]
-                        if event.pos[0] > cell.x \
-                                and event.pos[0] < cell.x + w \
-                                and event.pos[1] > cell.y \
-                                and event.pos[1] < cell.y + w:
-                            if event.button == 1:
-                                cell.action()
-                                if cell.bomb:
-                                    self.end(True)
-                                else:
-                                    self.remaining -= 1
+                self.grid.for_each(self._detect_click, event)
 
-                                if self.remaining <= 0:
-                                    self.end(False)
-                            elif event.button == 3:
-                                cell.flag()
-                            break
         self.grid.update()
-        if self.win or self.lose:
-            self._invoke_end(self.end_callbacks)
         return True
 
-    def end(self, lost: bool):
+    def _detect_click(self, cell, event):
+        """
+        Default callback to detect if a bomb was clicked.
+        Arguments:
+        cell - Cell object.
+        Returns:
+        True until cell is clicked.
+        """
+        if event.pos[0] > cell.x \
+                and event.pos[0] < cell.x + self.w \
+                and event.pos[1] > cell.y \
+                and event.pos[1] < cell.y + self.w:
+            if event.button == 1:
+                cell.action(self._after_action)
+                if cell.bomb:
+                    self.end_game(True)
+                else:
+                    self.remaining -= 1
+                    print("Remaining cells: ", self.remaining)
+
+                if self.remaining <= 0:
+                    self.end_game(False)
+            elif event.button == 3:
+                cell.flag()
+            return False
+        return True
+
+    # Callbacks:
+    def _show_all_bombs(self, cell):
+        """
+        Reveal (but do not end game) all bombs. Callback.
+        Arguments:
+        cell - Cell object.
+        Returns:
+        True for the entire loop.
+        """
+        if cell.bomb:
+            cell.action()  # Should not end game
+        return True
+
+    def _click_all_remaining(self, cell, dry=True):
+        """
+        For test purposes. Callback to click all remaining cells
+        that are not bombs.
+        Arguments:
+        cell - Cell object.
+        dry - True = game win is desired (remaining count is modified).
+        Returns:
+        True for entire loop.
+        """
+        if not cell.bomb:
+            cell.action(self._after_action)
+        if not dry:
+            self.remaining = 0  # To provoke reset afterwards
+        return True
+
+    def _click_a_bomb(self, cell):
+        """
+        For test purposes. Callback to click the first encountered bomb.
+        Arguments:
+        cell - Cell object.
+        Returns:
+        True until bomb is found.
+        """
+        if cell.bomb:
+            cell.action()
+            return False
+        return True
+
+    def _after_action(self, cell):
+        """
+        Default after valid cell action callback. "Valid" meaning the cell
+        was not revealed or flagged yet. Only reduces remaining count.
+        Arguments:
+        cell - Cell object action is performed on successfully.
+        """
+        self.remaining -= 1
+        print("_after_action remaining: ", self.remaining)
+
+    def end_game(self, lost: bool):
+        """
+        End the game.
+        Arguments:
+        lost - Lost game?
+        """
         self.lost = lost
         self.end = True
 
@@ -152,7 +225,7 @@ class Minesweeper(object):
         Returns:
         Generator of integer values of the grid after action.
         """
-        self.grid.at(i, j).action()
+        self.grid.at(i, j).action(self._after_action)
         return self.get_grid_vals()
 
     def reset(self):  # TODO: Finish working on this
@@ -175,56 +248,73 @@ class Minesweeper(object):
 
     def set_click_callable(self, cb: list):
         """
-        Set the list of callbacks to call after a cell click.
+        Set the list of callbacks to call after a cell action.
         Arguments:
         cb - List of callbacks.
         """
-        self.after_click = cb
+        self.after_action = cb
+
+    @staticmethod
+    def arg_parser():
+        """
+        Get an ArgumentParser instance with useful flags.
+        Returns:
+        ArgumentParser.
+        """
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--no-fit",
+                            action="store_false",
+                            help="disable window fitting to grid")
+        parser.add_argument("--width",
+                            type=int,
+                            default=800,
+                            help="set window width")
+        parser.add_argument("--height",
+                            type=int,
+                            default=600,
+                            help="set window height")
+        parser.add_argument("--cellw",
+                            type=int,
+                            help="set cell width",
+                            default=50)
+        parser.add_argument("--griddim",
+                            nargs=2,
+                            type=int,
+                            metavar=("ROWS", "COLS"),
+                            default=[9, 9],
+                            help="set grid dimensions")
+        parser.add_argument("--chance",
+                            type=int,
+                            default=4,
+                            help="set bomb_chance")
+        parser.add_argument("--bombs",
+                            type=int,
+                            default=10,
+                            help="set bomb_limit")
+        return parser
+
+    @classmethod
+    def from_args(cls):
+        """
+        Create Minesweeper object from flags on initialization.
+        Returns:
+        Minesweeper.
+        """
+        parser = Minesweeper.arg_parser()
+        args = parser.parse_args()
+        return Minesweeper(rows=args.griddim[0],
+                           cols=args.griddim[1],
+                           w=args.cellw,
+                           fit=args.no_fit,
+                           dwidth=args.width,
+                           dheight=args.height,
+                           bomb_chance=args.chance,
+                           bomb_limit=args.bombs)
 
 
 # If file run as script, e.g. python minesweeper.py
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--no-fit",
-                        action="store_false",
-                        help="disable window fitting to grid")
-    parser.add_argument("--width",
-                        type=int,
-                        default=800,
-                        help="set window width")
-    parser.add_argument("--height",
-                        type=int,
-                        default=600,
-                        help="set window height")
-    parser.add_argument("--cellw",
-                        type=int,
-                        help="set cell width",
-                        default=50)
-    parser.add_argument("--griddim",
-                        nargs=2,
-                        type=int,
-                        metavar=("ROWS", "COLS"),
-                        default=[9, 9],
-                        help="set grid dimensions")
-    parser.add_argument("--chance",
-                        type=int,
-                        default=4,
-                        help="set bomb_chance")
-    parser.add_argument("--bombs",
-                        type=int,
-                        default=10,
-                        help="set bomb_limit")
-    args = parser.parse_args()
-    ROWS = args.griddim[0]
-    COLS = args.griddim[1]
-    w = args.cellw
-
-    minesweeper = Minesweeper(ROWS, COLS, w,
-                              fit=args.no_fit,
-                              dwidth=args.width,
-                              dheight=args.height,
-                              bomb_chance=args.chance,
-                              bomb_limit=args.bombs)
+    minesweeper = Minesweeper.from_args()
 
     running = True
     while running:

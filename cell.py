@@ -123,11 +123,13 @@ class Cell(pygame.sprite.Sprite):
         """
         self.flagged = not self.flagged
 
-    def showSurrounding(self):
+    def showSurrounding(self, cb=None):
         """
         For all of the surrounding cells, reveal.
         Only called when the self.touching == 0.
+        Arguments:
+        cb - Callback that action() recieves.
         """
         if self.touching == 0 and not self.bomb:
             for neighbor in self.surrounding:
-                neighbor.action()
+                neighbor.action(cb)
