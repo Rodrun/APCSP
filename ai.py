@@ -20,11 +20,32 @@ class AI:
         self.population.add_reporter(neat.Checkpointer(1))
 
         self.game = mine
-        self.curr_grid = None
+        self.curr_remaining = None
         self.curr_fitness = 0.0
+        self.game.set_end_callbacks([self._end_call])
+        self.game.set_click_callbacks([self._after_click])
 
-    def _end_call(self, grid):
-        pass
+    def _after_click(self, cell, remaining):
+        """
+        Callback after a cell click.
+        """
+        self.curr_remaining = remaining
+
+    def _end_call(self, remaining, lost):
+        self.curr_fitness = AI.get_fitness(remaining,
+                                           self.game.get_total_cells())
+
+    @staticmethod
+    def get_fitness(remaining, max):
+        """
+        Calculate fitness.
+        Arguments:
+        remaining - Remaining amount of cells.
+        max - Maximum amount of cells.
+        Returns:
+        Fitness.
+        """
+        return remaining
 
     def evaluate(self, genomes, config):
         """
@@ -37,3 +58,8 @@ class AI:
                 pass
             # Evaluate fitness
             genome.fitness = 0.0
+
+
+if __name__ == "__main__":
+    parser = Minesweeper.arg_parser()
+    minesweeper = Minesweeper.from_args(parser)

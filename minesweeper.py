@@ -18,7 +18,8 @@ class Minesweeper(object):
     def __init__(self, rows, cols, w, font=None, font_ratio=0.6,
                  dwidth=800, dheight=600, fit=False, bomb_path="bomb.png",
                  uncover_path="cell_uncover.png", cover_path="cell_cover.png",
-                 flag_path="flag.png", bomb_chance=4, bomb_limit=10):
+                 flag_path="flag.png", bomb_chance=4, bomb_limit=10,
+                 user_input=True, dbg_reveal=False):
         """
         Initialize pygame and setup minesweeper. Invalid images may raise.
         Arguments:
@@ -37,10 +38,13 @@ class Minesweeper(object):
         bomb_limit - Maximum amount of bombs allowed.
         bomb_chance - Chance of a cell being a bomb. 4 would be 25%.
         remaining - The remaining cells that need to be cleared.
+        user_input - Allow user input.
+        dbg_reveal - Reveal all cells? Calls _click_all_remaining().
         """
         self.rows = rows
         self.cols = cols
         self.w = w
+        self.user_input = user_input
         self.detect_end = True  # Detect for win/loss?
         self.bomb_chance = bomb_chance
         self.bomb_limit = bomb_limit
@@ -67,7 +71,10 @@ class Minesweeper(object):
         Grid.flag_img = util.load_scaled(flag_path, (w - 12, w - 12))
 
         # Init grid
-        self.grid = Grid(rows, cols, w, bomb_chance, bomb_limit)
+        # self.grid = Grid(rows, cols, w, bomb_chance, bomb_limit)
+        self.reset()
+        if dbg_reveal:
+            self.grid.for_each(self._click_all_remaining)
 
         if fit:
             dwidth = rows * w
@@ -92,6 +99,10 @@ class Minesweeper(object):
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.grid.for_each(self._detect_click, event)
 
+        # Detect game win
+        if self.remaining <= 0:
+            self.end_game(False)
+
         self.grid.update()
         return True
 
@@ -111,12 +122,10 @@ class Minesweeper(object):
                 cell.action(self._after_action)
                 if cell.bomb:
                     self.end_game(True)
-                else:
+                elif not cell.revealed:
                     self.remaining -= 1
                     print("Remaining cells: ", self.remaining)
 
-                if self.remaining <= 0:
-                    self.end_game(False)
             elif event.button == 3:
                 cell.flag()
             return False
@@ -160,7 +169,7 @@ class Minesweeper(object):
         True until bomb is found.
         """
         if cell.bomb:
-            cell.action()
+            cell.action(self._after_action)
             return False
         return True
 
@@ -171,8 +180,11 @@ class Minesweeper(object):
         Arguments:
         cell - Cell object action is performed on successfully.
         """
-        self.remaining -= 1
-        print("_after_action remaining: ", self.remaining)
+        # print(cell)
+        if not cell.revealed:
+            self.remaining -= 1
+            print("_after_action remaining: ", self.remaining, " bombs: ",
+                  self.bomb_limit, " total: ", self.grid.get_total_cells())
 
     def end_game(self, lost: bool):
         self.lost = lost
@@ -205,12 +217,12 @@ class Minesweeper(object):
         Invoke callbacks on end of game. End of game is when either a bomb was
         clicked on (loss), or no more unrevealed cells remain (win).
         Arguments:
-        cb - List of callbacks to invoke in order. Only parameter is remaining
-             cell count.
+        cb - List of callbacks to invoke in order. Parameters given are:
+             cell count and lost bool.
         reset - Reset automatically after invoking callbacks?
         """
         for callback in cb:
-            callback(self.remaining)
+            callback(self.remaining, self.lost)
 
         if reset:
             self.reset()
@@ -232,6 +244,8 @@ class Minesweeper(object):
         self.grid = Grid(self.rows, self.cols, self.w,
                          bomb_chance=self.bomb_chance,
                          bomb_limit=self.bomb_limit)
+        self.remaining = self.get_total_cells() - self.bomb_limit
+        print("Grid reset. Remaining: ", self.remaining, " ", self.grid.state_str())
 
     def get_grid_vals(self):
         """
@@ -242,7 +256,7 @@ class Minesweeper(object):
         for c in self.grid:
             yield c.value
 
-    def set_click_callable(self, cb: list):
+    def set_click_callbacks(self, cb: list):
         """
         Set the list of callbacks to call after a cell action.
         Arguments:
@@ -250,14 +264,27 @@ class Minesweeper(object):
         """
         self.after_action = cb
 
+    def get_total_cells(self):
+        """
+        Get total amount of cells in the grid. Wrapper for
+        grid.get_total_cells().
+        Returns:
+        Cell count.
+        """
+        return self.grid.get_total_cells()
+
     @staticmethod
-    def arg_parser():
+    def arg_parser(parser=None):
         """
         Get an ArgumentParser instance with useful flags.
+        Arguments:
+        parser - If given, will use this parser object and add extra arguments.
+                 Note that this could create conflicts with the extra args.
         Returns:
         ArgumentParser.
         """
-        parser = argparse.ArgumentParser()
+        if parser is None:
+            parser = argparse.ArgumentParser()
         parser.add_argument("--no-fit",
                             action="store_false",
                             help="disable window fitting to grid")
@@ -287,16 +314,23 @@ class Minesweeper(object):
                             type=int,
                             default=10,
                             help="set bomb_limit")
+        parser.add_argument("--debug-reveal-cells",
+                            action="store_true",
+                            help="Reveal all non-bomb cells")
         return parser
 
     @classmethod
-    def from_args(cls):
+    def from_args(cls, parser=None):
         """
-        Create Minesweeper object from flags on initialization.
+        Create Minesweeper object from flags on initialization..
+        Arguments:
+        parser - If given, will use this parser. NOTE: Will assume that it will
+                 have arguments that arg_parser() adds.
         Returns:
         Minesweeper.
         """
-        parser = Minesweeper.arg_parser()
+        if parser is None:
+            parser = Minesweeper.arg_parser()
         args = parser.parse_args()
         return Minesweeper(rows=args.griddim[0],
                            cols=args.griddim[1],
@@ -305,7 +339,8 @@ class Minesweeper(object):
                            dwidth=args.width,
                            dheight=args.height,
                            bomb_chance=args.chance,
-                           bomb_limit=args.bombs)
+                           bomb_limit=args.bombs,
+                           dbg_reveal=args.debug_reveal_cells)
 
 
 # If file run as script, e.g. python minesweeper.py

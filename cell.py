@@ -110,11 +110,11 @@ class Cell(pygame.sprite.Sprite):
         """
         if not self.actDebounce and not self.flagged:
             self.actDebounce = True
-            self.revealed = True
-            self.showSurrounding()  # Only if touching = 0
+            self.showSurrounding(cb)  # Only if touching = 0
             # print(self.get_summary())
-            if cb is not None:
+            if cb is not None and not self.revealed:
                 cb(self)
+            self.revealed = True
 
     def flag(self):
         """

@@ -79,6 +79,14 @@ class Grid(pygame.sprite.Group):
                 if not callback(j, *args):
                     break
 
+    def get_total_cells(self):
+        """
+        Get total cells.
+        Returns:
+        Cell count.
+        """
+        return self.rows * self.cols
+
     def state_str(self):
         """
         Get basic overview information about the current
