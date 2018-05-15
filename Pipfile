@@ -5,7 +5,8 @@ url = "https://pypi.org/simple"
 
 [packages]
 pygame = "*"
-neat-python = "*"
+theano = "*"
+keras = "*"
 
 [dev-packages]
 

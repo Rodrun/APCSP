@@ -12,14 +12,16 @@ class Grid(pygame.sprite.Group):
     bomb_img = None  # Bomb image
     font = None  # Cell font
 
-    def __init__(self, rows, cols, w=50, bomb_chance=4, bomb_limit=10):
+    def __init__(self, rows, cols, w=50, bomb_chance=4, bomb_limit=10,
+                 x_offset=0, y_offset=0):
         """
         Generate a 2D list of safe and bomb cells.
         Arguments:
         rows - Number of rows.
         cols - Number of columns.
         w - Width of a cell.
-        bomb_chance - Chance of a cell being a bomb.
+        bomb_chance - Chance of a cell being a bomb. (Deprecated)
+        bomb_limit - Amount of bombs.
         """
         super().__init__()
         self.rows = rows
@@ -132,6 +134,15 @@ class Grid(pygame.sprite.Group):
         j - Y index.
         """
         return self.array[i][j]
+
+    def detect_click(self, mx, my):
+        """
+        Detect click on a cell given click coordinates on screen.
+        Arguments:
+        mx - Mouse X.
+        my - Mouse Y.
+        """
+        pass
 
     def set_touching(self, c: Cell):
         """
