@@ -125,8 +125,8 @@ class Minesweeper(object):
                 and event.pos[1] < cell.y + self.w:
             if event.button == 1:
                 cell.action(self._after_action)
-                if cell.bomb and not cell.flagged:
-                    self.end_game(True)
+                # if cell.bomb and not cell.flagged:
+                #     self.end_game(True)
 
             elif event.button == 3:
                 cell.flag()
@@ -181,6 +181,9 @@ class Minesweeper(object):
         cell - Cell object action is performed on successfully.
         """
         # print(cell)
+        if cell.bomb and not cell.flagged:
+            self.end_game(True)  # Lose game
+            return
         if not cell.revealed and not cell.flagged:
             self.remaining -= 1
             # print("_after_action remaining: ", self.remaining, " bombs: ",
