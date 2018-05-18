@@ -16,6 +16,21 @@ def load_scaled(path, dim: set):
     return scale(load(path), dim)
 
 
+def font_scaled(text: str, font, dim: set, col, antialias=True):
+    """
+    Render a font and scale.
+    Arguments:
+    text - Text to render.
+    font - Font object.
+    dim - Dimension to scale to.
+    col - Color to render text.
+    antialias - Enable anti-aliasing.
+    Returns:
+    Scaled text surface.
+    """
+    return scale(font.render(text, antialias, col), dim)
+
+
 def pt_within(p: set, r: Rect) -> bool:
     """
     Check if point p is within rectangle r.

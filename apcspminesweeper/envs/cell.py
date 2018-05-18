@@ -1,8 +1,13 @@
 """Grid cell object.
+
+Take note that a cell object has no reset function, meaning a reset
+must be done by deletion and recreation of a Cell object.
 """
 import copy
 
 import pygame
+
+from util import font_scaled
 
 
 class Cell(pygame.sprite.Sprite):
@@ -44,6 +49,8 @@ class Cell(pygame.sprite.Sprite):
         self.surrounding = []
         self.tagged = False
         self.rendered_text = False  # To prevent Font.render() multiple times
+        self.rendered_debug = False  # ^ but for coordinate display on cell
+        self.show_debug = False  # Show debug coordinates over cell?
         # print(self.get_summary())
 
     def __repr__(self):
@@ -67,8 +74,30 @@ class Cell(pygame.sprite.Sprite):
                     self.rendered_text = True
         elif not self.revealed and self.flagged:
             self._set_image(Cell.flag_img)
-        else:
-            self._set_image(Cell.cover_img)
+        else:  # Covered cell
+            # Debug coordinates
+            if self.show_debug:
+                if not self.rendered_debug:
+                    # Create coordinate text
+                    txt = font_scaled(str((self.i, self.j)),
+                                      Cell.font,
+                                      (self.w, self.w),
+                                      (0, 255, 0))
+                    self.rendered_debug = True  # Prevent repeated rendering
+                else:
+                    txt = None
+                # Draw coordinates
+                if txt is not None:
+                    self.image.blit(txt, (0, 0))
+            else:  # Render plain covered cell
+                self._set_image(Cell.cover_img)
+
+    def enable_debug(self):
+        """
+        Render debug coordinates over unrevealed cell. NOTE: This is a one-time
+        state set; cannot disable once enabled during lifetime of the cell.
+        """
+        self.show_debug = True
 
     def get_value(self):
         """
