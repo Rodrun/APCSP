@@ -11,6 +11,7 @@ class Cell(pygame.sprite.Sprite):
     cover_img = None  # Unclicked image
     uncover_img = None  # Revealed image
     font = None  # Font to display # touching bombs
+    RGB_GRAY = [90, 90, 90, 255]
 
     def __init__(self, x, y, w, bomb=False, rows=9, cols=9):
         """
@@ -79,7 +80,34 @@ class Cell(pygame.sprite.Sprite):
         if self.revealed:
             return self.touching
         else:
-            return -999
+            return -1
+
+    @staticmethod
+    def value_to_rgba(val: int) -> tuple:
+        """
+        Convert cell value to RGBA value. Can support
+        up to value 15, albeit up to value 8 is only
+        useful.
+        Arguments:
+        val - Cell value.
+        Returns:
+        RGBA tuple.
+        """
+        if val < 0 or val > 15:
+            return (0, 0, 0, 0)  # Black for unrevealed
+        else:
+            # Store big endian
+            cset = []
+            power = len(cset) - 1
+            remainder = val
+            for power in range(len(cset) - 1, -1, -1):
+                bin_val = 2 ** power  # Binary value if current val is 1
+                if bin_val <= remainder:
+                    v = bin_val * 255  # Max out the current value
+                    remainder -= bin_val
+                if remainder <= 0:
+                    break
+            return cset
 
     def get_summary(self):
         """

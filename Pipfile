@@ -5,7 +5,9 @@ url = "https://pypi.org/simple"
 
 [packages]
 pygame = "*"
-neat-python = "*"
+keras-rl = "*"
+gym = "*"
+"e1839a8" = {editable = true, path = "."}
 
 [dev-packages]
 
