@@ -1,5 +1,5 @@
 # Minesweeper with GANN AI
 
-Train a GANN model to play minesweeper.
+Train a neural network model to play minesweeper using reinforcement learning.
 
 For APCSP final project.
