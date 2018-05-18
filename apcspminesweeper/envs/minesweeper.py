@@ -1,17 +1,25 @@
 """
-Minesweeper game.
+Minesweeper game environment. Can be used as an OpenAI Gym environment.
+
+Controls:
+    F4: Show all revealable cells (dry).
+    F5: Show all bombs & disable lose.
+    F6: Reset.
 """
 import os
 import argparse
 
 import pygame
+import gym
 
 import util
 from grid import Grid
 
 
-class Minesweeper(object):
+class Minesweeper(gym.Env):
 
+    # For gym.Env
+    metadata = {"render.modes": ["human"]}
     # The default font to use
     DEFAULT = "Comic Sans MS" if os.name == "nt" else "Arial"
 
@@ -72,7 +80,6 @@ class Minesweeper(object):
         Grid.flag_img = util.load_scaled(flag_path, (w - 12, w - 12))
 
         # Init grid
-        # self.grid = Grid(rows, cols, w, bomb_chance, bomb_limit)
         self.reset()
         if dbg_reveal:
             self.grid.for_each(self._click_all_remaining, reveal_dry)
@@ -82,6 +89,10 @@ class Minesweeper(object):
             dheight = cols * w
 
         self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
+
+    # For gym.Env:
+    def step(self, action):
+        pass
 
     def update(self) -> bool:
         """
@@ -99,10 +110,13 @@ class Minesweeper(object):
                 return False
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.grid.for_each(self._detect_click, event)
-
-        # Detect game win
-        if self.remaining <= 0:
-            self.end_game(False)
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_F5:
+                    self.grid.for_each(self._show_all_bombs)
+                elif event.key == pygame.K_F6:
+                    self.grid.for_each(self._click_all_remaining)
+                elif event.key == pygame.K_F7:
+                    self.end_game(False)
 
         self.grid.update()
         return True
@@ -125,8 +139,6 @@ class Minesweeper(object):
                 and event.pos[1] < cell.y + self.w:
             if event.button == 1:
                 cell.action(self._after_action)
-                # if cell.bomb and not cell.flagged:
-                #     self.end_game(True)
 
             elif event.button == 3:
                 cell.flag()
@@ -186,8 +198,9 @@ class Minesweeper(object):
             return
         if not cell.revealed and not cell.flagged:
             self.remaining -= 1
-            # print("_after_action remaining: ", self.remaining, " bombs: ",
-            #       self.bomb_limit, " total: ", self.grid.get_total_cells())
+        # Detect game win
+        if self.remaining <= 0:
+            self.end_game(False)
 
     def end_game(self, lost: bool):
         self.lost = lost

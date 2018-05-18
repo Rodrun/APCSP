@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0f836f40d6251a727e7a7af7bb6fedcd9416eeaccc7870653ac7b0c57cfa0aba"
+            "sha256": "4e81ce011ac42c6c330cb2db83cc74f4048465c3cb356617bf67df37ec28d706"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,37 @@
         ]
     },
     "default": {
+        "certifi": {
+            "hashes": [
+                "sha256:13e698f54293db9f89122b0581843a782ad0934a4fe0172d2a980ba77fc61bb7",
+                "sha256:9fa520c1bacfb634fa7af20a76bcbd3d5fb390481724c597da32c719a7dca4b0"
+            ],
+            "version": "==2018.4.16"
+        },
+        "chardet": {
+            "hashes": [
+                "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae",
+                "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"
+            ],
+            "version": "==3.0.4"
+        },
+        "e1839a8": {
+            "editable": true,
+            "path": "."
+        },
+        "future": {
+            "hashes": [
+                "sha256:e39ced1ab767b5936646cedba8bcce582398233d6a627067d4c6a454c90cfedb"
+            ],
+            "version": "==0.16.0"
+        },
+        "gym": {
+            "hashes": [
+                "sha256:6baf3f3b163e237869d92a64daeaa88f14f62bb1105863e45312505a19dbd652"
+            ],
+            "index": "pypi",
+            "version": "==0.10.5"
+        },
         "h5py": {
             "hashes": [
                 "sha256:07ddea6bb649a257fc57ccae359a36d691b2ef8b9617971ae7d6f74ef6f67cad",
@@ -44,13 +75,26 @@
             ],
             "version": "==2.7.1"
         },
+        "idna": {
+            "hashes": [
+                "sha256:2c6a5de3089009e3da7c5dde64a141dbc8551d5b7f6cf4ed7c2568d0cc520a8f",
+                "sha256:8c7309c718f94b3a625cb648ace320157ad16ff131ae0af362c9f21b80ef6ec4"
+            ],
+            "version": "==2.6"
+        },
         "keras": {
             "hashes": [
                 "sha256:a7abff3e87b6706764fbbd0521ba8f54c48f0720fd0495860cd3d2fd67899d48",
                 "sha256:c14af1081242c25617ade7eb62121d58d01f16e1e744bae9fc4f1f95a417716e"
             ],
-            "index": "pypi",
             "version": "==2.1.6"
+        },
+        "keras-rl": {
+            "hashes": [
+                "sha256:fc1ac59602cf684230bce4576e05ee7065e792ed1e14bd553950553c7eb4fdc2"
+            ],
+            "index": "pypi",
+            "version": "==0.4.0"
         },
         "numpy": {
             "hashes": [
@@ -105,6 +149,13 @@
             "index": "pypi",
             "version": "==1.9.3"
         },
+        "pyglet": {
+            "hashes": [
+                "sha256:8b07aea16f34ac861cffd06a0c17723ca944d172e577b57b21859b7990709a66",
+                "sha256:b00570e7cdf6971af8953b6ece50d83d13272afa5d1f1197c58c0f478dd17743"
+            ],
+            "version": "==1.3.2"
+        },
         "pyyaml": {
             "hashes": [
                 "sha256:0c507b7f74b3d2dd4d1322ec8a94794927305ab4cebbe89cc47fe5e81541e6e8",
@@ -123,6 +174,13 @@
                 "sha256:e863072cdf4c72eebf179342c94e6989c67185842d9997960b3e69290b2fa269"
             ],
             "version": "==3.12"
+        },
+        "requests": {
+            "hashes": [
+                "sha256:6a1b267aa90cac58ac3a765d067950e7dbbf75b1da07e895d1f594193a40a38b",
+                "sha256:9c443e7324ba5b85070c4a818ade28bfabedf16ea10206da1132edaa6dda237e"
+            ],
+            "version": "==2.18.4"
         },
         "scipy": {
             "hashes": [
@@ -159,12 +217,12 @@
             ],
             "version": "==1.11.0"
         },
-        "theano": {
+        "urllib3": {
             "hashes": [
-                "sha256:88d8aba1fe2b6b75eacf455d01bc7e31e838c5a0fb8c13dde2d9472495ff4662"
+                "sha256:06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b",
+                "sha256:cc44da8e1145637334317feebd728bd869a35285b93cbb4cca2577da7e62db4f"
             ],
-            "index": "pypi",
-            "version": "==1.0.1"
+            "version": "==1.22"
         }
     },
     "develop": {}

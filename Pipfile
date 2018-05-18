@@ -5,8 +5,9 @@ url = "https://pypi.org/simple"
 
 [packages]
 pygame = "*"
-theano = "*"
-keras = "*"
+keras-rl = "*"
+gym = "*"
+"e1839a8" = {editable = true, path = "."}
 
 [dev-packages]
 

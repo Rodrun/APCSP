@@ -2,6 +2,7 @@
 Grid Object
 """
 import pygame
+import gym
 
 from cell import Cell
 from random import randint
