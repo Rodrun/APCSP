@@ -2,18 +2,36 @@
 Minesweeper game environment. Can be used as an OpenAI Gym environment.
 
 Controls:
-    F4: Show all revealable cells (dry).
-    F5: Show all bombs & disable lose.
-    F6: Reset.
+    F5: Show all revealable cells (dry).
+    F6: Show all bombs & disable lose.
+    F7: Reset.
+    F8: Show all cell debug coordinates.
+
+Observation space (Box, 2 dimensions):
+NUM OBSERVATION MIN MAX
+0   Revealed    0   1
+1   Touching    0   8
+
+Action space (Box, 2 dimensions):
+NUM ACTION  MIN MAX
+0   Click X 0   (cols)
+1   Click Y 0   (rows)
+
+Reward:
+For every click on a non-revealed cell: 1.
+For every click on a revealed cell: -1.
+For every click on a bomb: -4.
 """
 import os
 import argparse
 
+import numpy as np
 import pygame
 import gym
 
 import util
 from grid import Grid
+# from grid_space import GridSpace
 
 
 class Minesweeper(gym.Env):
@@ -90,9 +108,19 @@ class Minesweeper(gym.Env):
 
         self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
 
+        # self.action_space = GridSpace(self.grid)
+        # Action space: Minimum/maximum X and Y input
+        self.action_space = gym.spaces.Box(np.array([0, 0]),
+                                           np.array([cols, rows]))
+
     # For gym.Env:
     def step(self, action):
-        pass
+        """
+        Derived from gym.Env.
+        Returns:
+        observation, reward, done, info - Tuple.
+        """
+        return
 
     def update(self) -> bool:
         """
@@ -117,6 +145,8 @@ class Minesweeper(gym.Env):
                     self.grid.for_each(self._click_all_remaining)
                 elif event.key == pygame.K_F7:
                     self.end_game(False)
+                elif event.key == pygame.K_F8:
+                    self.grid.for_each(self._show_cell_debug)
 
         self.grid.update()
         return True
@@ -185,6 +215,17 @@ class Minesweeper(gym.Env):
             return False
         return True
 
+    def _show_cell_debug(self, cell):
+        """
+        Callback to show coordinates of each covered cell.
+        Arguments:
+        cell - Cell object.
+        Returns:
+        True for entire loop.
+        """
+        cell.enable_debug()
+        return True
+
     def _after_action(self, cell):
         """
         Default after valid cell action callback. "Valid" meaning the cell
@@ -221,6 +262,13 @@ class Minesweeper(gym.Env):
         Quit pygame.
         """
         pygame.quit()
+
+    # Env inheritance
+    def render(self, mode="human"):
+        """
+        Derived from gym.Env.
+        """
+        self.draw()
 
     def draw(self, flip=True):
         """
