@@ -5,12 +5,11 @@ import pygame
 
 class UIContainer(pygame.sprite.LayeredUpdates):
 
-    def __init__(self, dfont=""):
+    def __init__(self, height, dfont="digital-7.ttf", font_ratio=.4):
         """
         Arguments:
         dfont - Font to use.
         """
-        self.dfont = dfont
-        if dfont is None:
-            # Use default font
-            pass
+        assert dfont is not None
+        self.font = pygame.font.Font(dfont,
+                                     int(height * font_ratio))

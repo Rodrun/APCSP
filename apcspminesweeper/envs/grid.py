@@ -1,8 +1,8 @@
-"""
-Grid Object
+"""Minesweeper grid object.
+
+Keeps cells organized and allows traversal and accessing of thereof.
 """
 import pygame
-import gym
 
 from cell import Cell
 from random import randint
@@ -56,14 +56,14 @@ class Grid(pygame.sprite.Group):
 
         # Create grid
         self.array = [[None for i in range(cols)] for j in range(rows)]
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for j in range(self.rows):  # Row (y)
+            for i in range(self.cols):  # Column (x)
                 scoord = self._coord_str(i, j)
-                self.array[i][j] = Cell(i, j, self.w,
+                self.array[j][i] = Cell(i, j, self.w,
                                         bomb=scoord in bomb_tuples)
 
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for j in range(self.rows):
+            for i in range(self.cols):
                 current = self.at(i, j)
                 self.get_neighbors(current)
                 self.set_touching(current)
@@ -77,10 +77,41 @@ class Grid(pygame.sprite.Group):
                    is returned: will break loop.
         args - Any additional arguments that the callback may require.
         """
-        for i in self.array:
-            for j in i:
-                if not callback(j, *args):
+        for j in self.array:
+            for i in j:
+                if not callback(i, *args):
                     break
+
+    def get_values(self) -> tuple:
+        """
+        Get two lists of all cell values.
+        Returns:
+        revealed - 2D list revealed cell values.
+        touching - 2D list touching cell values.
+        """
+        # Create empty 2d lists of 0s
+        rr = range(self.rows)
+        cr = range(self.cols)  # Might be redundant but screw it for now:
+        revealed = [[self.at(i, j).get_values()[0] for i in cr] for j in rr]
+        touching = [[self.at(i, j).get_values()[1] for i in cr] for j in rr]
+        # Get values and put them in their respective lists
+        self.for_each(self._update_value_lists, revealed, touching)
+        return revealed, touching
+
+    def _update_value_lists(self, cell, rlist: list, tlist: list):
+        """
+        Callback to update given value lists.
+        Arguments:
+        cell - Cell object.
+        rlist - Revealed list (must be 2D).
+        tlist - Touching list (must be 2D).
+        Returns:
+        True for entire loop.
+        """
+        i = cell.i
+        j = cell.j
+        rlist[j][i], tlist[j][i] = cell.get_values()
+        return True
 
     def get_total_cells(self):
         """
