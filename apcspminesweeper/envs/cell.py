@@ -1,7 +1,9 @@
 """Grid cell object.
 
 Take note that a cell object has no reset function, meaning a reset
-must be done by deletion and recreation of a Cell object.
+must be done by deletion and recreation of a Cell object. Cell object
+coordinates are represented as: (i, j), where i is the X and j is the Y
+relative to the position in the grid array.S
 """
 import copy
 
@@ -29,10 +31,10 @@ class Cell(pygame.sprite.Sprite):
         cols - Columns of parent grid.
         """
         super().__init__()
-        self.i = x
-        self.j = y
-        self.x = x * w
-        self.y = y * w
+        self.i = x  # Grid coordinate X
+        self.j = y  # Grid coordinate Y
+        self.x = x * w  # Display coordinate X
+        self.y = y * w  # Dispaly coordinate Y
         self.w = w
         self._set_image(Cell.cover_img)
         self.rect = self.image.get_rect()
@@ -99,44 +101,50 @@ class Cell(pygame.sprite.Sprite):
         """
         self.show_debug = True
 
-    def get_value(self):
+    def get_values(self) -> tuple:
         """
-        Get the integer value of the cell.
+        Get the representative values for the cell.
         Returns:
-        Touching bomb count if revealed, otherwise -1.
-        NOTE: Bomb cells return -1 as well!
+        revealed - 1 if revealed, otherwise 0.
+        touching - Number of touching cells (-1 if not revealed).
         """
         if self.revealed:
-            return self.touching
+            if not self.bomb:
+                return 1, self.touching
+            else:
+                return 1, -1
         else:
-            return -1
+            return 0, -1
 
-    @staticmethod
-    def value_to_rgba(val: int) -> tuple:
-        """
-        Convert cell value to RGBA value. Can support
-        up to value 15, albeit up to value 8 is only
-        useful.
-        Arguments:
-        val - Cell value.
-        Returns:
-        RGBA tuple.
-        """
-        if val < 0 or val > 15:
-            return (0, 0, 0, 0)  # Black for unrevealed
-        else:
-            # Store big endian
-            cset = []
-            power = len(cset) - 1
-            remainder = val
-            for power in range(len(cset) - 1, -1, -1):
-                bin_val = 2 ** power  # Binary value if current val is 1
-                if bin_val <= remainder:
-                    v = bin_val * 255  # Max out the current value
-                    remainder -= bin_val
-                if remainder <= 0:
-                    break
-            return cset
+    # @staticmethod
+    # def value_to_rgba(val: int) -> tuple:
+    #     """
+    #     Convert cell value to RGBA value. Can support
+    #     up to value 15, albeit up to value 8 is only
+    #     useful.
+    #     Arguments:
+    #     val - Cell value.
+    #     Returns:
+    #     RGB tuple.
+    #     """
+    #     if val <= 0 or val > 15:
+    #         return (0, 0, 0)  # Black for unrevealed
+    #     elif val <= 7:
+    #         cset = [0 for _ in range(3)]
+    #         power = len(cset) - 1
+    #         remainder = val
+    #         for power in range(len(cset) - 1, -1, -1):
+    #             bin_val = 2 ** power  # Binary value if current val is 1
+    #             if bin_val <= remainder:
+    #                 v = 255  # Max out the current value
+    #                 cset[power] = v
+    #                 remainder -= bin_val
+    #             if remainder <= 0:
+    #                 break
+    #         return cset
+    #     else:  # Special case for >= 8
+    #         if val >= 8:  # Probably unecessary check
+    #             return (255, 100, 0)  # Orangey color
 
     def get_summary(self):
         """

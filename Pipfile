@@ -8,8 +8,10 @@ pygame = "*"
 keras-rl = "*"
 gym = "*"
 "e1839a8" = {editable = true, path = "."}
+theano = "*"
 
 [dev-packages]
+rope = "*"
 
 [requires]
 python_version = "3.5"

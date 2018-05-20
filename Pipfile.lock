@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4e81ce011ac42c6c330cb2db83cc74f4048465c3cb356617bf67df37ec28d706"
+            "sha256": "5aedca8c3d5bd9313ee4323b1341e17abd55683c99e6c2e1cdf8201bea79de06"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -217,6 +217,13 @@
             ],
             "version": "==1.11.0"
         },
+        "theano": {
+            "hashes": [
+                "sha256:88d8aba1fe2b6b75eacf455d01bc7e31e838c5a0fb8c13dde2d9472495ff4662"
+            ],
+            "index": "pypi",
+            "version": "==1.0.1"
+        },
         "urllib3": {
             "hashes": [
                 "sha256:06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b",
@@ -225,5 +232,13 @@
             "version": "==1.22"
         }
     },
-    "develop": {}
+    "develop": {
+        "rope": {
+            "hashes": [
+                "sha256:a09edfd2034fd50099a67822f9bd851fbd0f4e98d3b87519f6267b60e50d80d1"
+            ],
+            "index": "pypi",
+            "version": "==0.10.7"
+        }
+    }
 }

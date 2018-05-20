@@ -8,14 +8,14 @@ Controls:
     F8: Show all cell debug coordinates.
 
 Observation space (Box, 2 dimensions):
-NUM OBSERVATION MIN MAX
-0   Revealed    0   1
-1   Touching    0   8
+NUM OBSERVATION MIN MAX SHAPE
+0   Revealed    0   1   1
+1   Touching    0   8   2,
 
 Action space (Box, 2 dimensions):
-NUM ACTION  MIN MAX
-0   Click X 0   (cols)
-1   Click Y 0   (rows)
+NUM ACTION  MIN MAX     SHAPE
+0   Click X 0   (cols)  1
+1   Click Y 0   (rows)  1
 
 Reward:
 For every click on a non-revealed cell: 1.
@@ -27,14 +27,14 @@ import argparse
 
 import numpy as np
 import pygame
-import gym
+from gym import spaces, Env
 
 import util
 from grid import Grid
 # from grid_space import GridSpace
 
 
-class Minesweeper(gym.Env):
+class Minesweeper(Env):
 
     # For gym.Env
     metadata = {"render.modes": ["human"]}
@@ -108,10 +108,25 @@ class Minesweeper(gym.Env):
 
         self.gameDisplay = pygame.display.set_mode((dwidth, dheight))
 
-        # self.action_space = GridSpace(self.grid)
-        # Action space: Minimum/maximum X and Y input
-        self.action_space = gym.spaces.Box(np.array([0, 0]),
-                                           np.array([cols, rows]))
+        # See module docstring for info
+        self.action_space = spaces.Box(np.array([0, 0]),
+                                       np.array([cols - 1, rows - 1]),
+                                       dtype=np.int32)
+        self.observation_space = spaces.Tuple((
+            spaces.Box(0, 1, (2,), dtype=np.int32),
+            spaces.Box(0, 8, (2,), dtype=np.int32)
+        ))
+
+    def get_observation_space(self):
+        """
+        Get the current observation space.
+        Returns:
+        Updated observation space.
+        """
+        # The observation space is 2 2D Boxes: revealed, touching
+        revealed, touching = self.grid.get_values()
+        return (np.array(revealed, dtype=np.int32),
+                np.array(touching, dtype=np.int32))
 
     # For gym.Env:
     def step(self, action):
@@ -120,7 +135,25 @@ class Minesweeper(gym.Env):
         Returns:
         observation, reward, done, info - Tuple.
         """
-        return
+        cx, cy = action[0], action[1]
+        # Check if cell already revealed
+        c_revealed = self.grid.at(cx, cy).revealed
+        # Perform action
+        self.click_cell(cx, cy)
+        # Check if lost/won
+        self.update()  # Ctrl + C will force end
+        if self.lost:
+            reward = -4.0  # Big punish for losing
+        elif c_revealed:
+            reward = -1.0  # Punish for clicking on already revealed cell
+        elif self.end and not self.lost:
+            reward = 5.0  # Big reward for winning
+        else:
+            reward = 1.0  # Normal reward for clicking on non-revealed cell
+        observation = self.get_observation_space()
+        done = self.end
+        info = {}
+        return observation, reward, done, info
 
     def update(self) -> bool:
         """
