@@ -1,6 +1,7 @@
 # Minesweeper with AI
 
-Train a neural network model to play minesweeper using reinforcement learning.
+-Train a neural network model to play minesweeper using reinforcement learning.
+-Create an algorithm that can play the minesweeper game using logic.
 
 For APCSP final project.
 
