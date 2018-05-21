@@ -2,7 +2,7 @@
 
 -Train a neural network model to play minesweeper using reinforcement learning.
 
--Create an algorithm that can play the minesweeper game using logic.
+-Create an algorithm that can play the minesweeper game using logic for comparison.
 
 For APCSP final project.
 
