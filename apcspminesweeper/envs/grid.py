@@ -2,9 +2,10 @@
 
 Keeps cells organized and allows traversal and accessing of thereof.
 """
+import numpy as np
 import pygame
 
-from cell import Cell
+from .cell import Cell
 from random import randint
 
 
@@ -55,12 +56,17 @@ class Grid(pygame.sprite.Group):
                     remaining -= 1
 
         # Create grid
+        self.id_table = {}  # For quick lookup
         self.array = [[None for i in range(cols)] for j in range(rows)]
+        curr_id = 0
         for j in range(self.rows):  # Row (y)
             for i in range(self.cols):  # Column (x)
                 scoord = self._coord_str(i, j)
-                self.array[j][i] = Cell(i, j, self.w,
+                self.array[j][i] = Cell(i, j, self.w, curr_id,
                                         bomb=scoord in bomb_tuples)
+                # Add to lookup table, but only coordinates (i, j)
+                self.id_table[str(curr_id)] = (i, j)
+                curr_id += 1
 
         for j in range(self.rows):
             for i in range(self.cols):
@@ -82,21 +88,49 @@ class Grid(pygame.sprite.Group):
                 if not callback(i, *args):
                     break
 
+    def get_by_id(self, id):
+        """
+        Get cell object by ID (numeric string).
+        Arguments:
+        id - ID to lookup, can be integer or str.
+        Returns:
+        Cell object if found, otherwise None.
+        """
+        if str(id) in self.id_table:
+            c = self.id_table[str(id)]
+            return self.array[c[1]][c[0]]
+        else:
+            return None
+
     def get_values(self) -> tuple:
         """
         Get two lists of all cell values.
         Returns:
-        revealed - 2D list revealed cell values.
-        touching - 2D list touching cell values.
+        Pixel values list 2d.
         """
         # Create empty 2d lists of 0s
-        rr = range(self.rows)
-        cr = range(self.cols)  # Might be redundant but screw it for now:
-        revealed = [[self.at(i, j).get_values()[0] for i in cr] for j in rr]
-        touching = [[self.at(i, j).get_values()[1] for i in cr] for j in rr]
-        # Get values and put them in their respective lists
-        self.for_each(self._update_value_lists, revealed, touching)
-        return revealed, touching
+        # rr = range(self.rows)
+        # cr = range(self.cols)  # Might be redundant but screw it for now:
+        # revealed = [[self.at(i, j).get_values()[0] for i in cr] for j in rr]
+        # touching = [[self.at(i, j).get_values()[1] for i in cr] for j in rr]
+        # # Get values and put them in their respective lists
+        # self.for_each(self._update_value_lists, revealed, touching)
+        # return revealed, touching
+        out = np.zeros(shape=(3, self.rows, self.cols), dtype=np.uint8)
+        self.for_each(self._update_color_lists, out)
+        return out
+
+    def _update_color_lists(self, cell, out: list):
+        """
+        Callback to update given output colors list to feed the network.
+        Arguments:
+        cell - Cell object.
+        out - Output list
+        Returns:
+        True for entire loop.
+        """
+        out[cell.j][cell.i] = list(Cell.value_to_rgba(cell.get_values()[1]))
+        return True
 
     def _update_value_lists(self, cell, rlist: list, tlist: list):
         """

@@ -1,17 +1,25 @@
 [[source]]
+
 verify_ssl = true
 name = "pypi"
 url = "https://pypi.org/simple"
 
+
 [packages]
+
 pygame = "*"
 keras-rl = "*"
 gym = "*"
 "e1839a8" = {editable = true, path = "."}
 theano = "*"
+pillow = "*"
+
 
 [dev-packages]
+
 rope = "*"
 
+
 [requires]
+
 python_version = "3.5"

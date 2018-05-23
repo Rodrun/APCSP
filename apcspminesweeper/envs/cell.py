@@ -9,7 +9,7 @@ import copy
 
 import pygame
 
-from util import font_scaled
+from .util import font_scaled
 
 
 class Cell(pygame.sprite.Sprite):
@@ -20,22 +20,25 @@ class Cell(pygame.sprite.Sprite):
     font = None  # Font to display # touching bombs
     RGB_GRAY = [90, 90, 90, 255]
 
-    def __init__(self, x, y, w, bomb=False, rows=9, cols=9):
+    def __init__(self, x, y, w, id, bomb=False, rows=9, cols=9):
         """
         Arguments:
         bomb - Is bomb?
         x - X location in grid.
         y - Y location in grid.
         w - Width of cell.
+        id - ID of cell.
         rows - Rows of parent grid.
         cols - Columns of parent grid.
         """
         super().__init__()
         self.i = x  # Grid coordinate X
         self.j = y  # Grid coordinate Y
+        self.location = (self.i, self.j)  # Nice tuple
         self.x = x * w  # Display coordinate X
         self.y = y * w  # Dispaly coordinate Y
         self.w = w
+        self.id = id
         self._set_image(Cell.cover_img)
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -116,35 +119,35 @@ class Cell(pygame.sprite.Sprite):
         else:
             return 0, -1
 
-    # @staticmethod
-    # def value_to_rgba(val: int) -> tuple:
-    #     """
-    #     Convert cell value to RGBA value. Can support
-    #     up to value 15, albeit up to value 8 is only
-    #     useful.
-    #     Arguments:
-    #     val - Cell value.
-    #     Returns:
-    #     RGB tuple.
-    #     """
-    #     if val <= 0 or val > 15:
-    #         return (0, 0, 0)  # Black for unrevealed
-    #     elif val <= 7:
-    #         cset = [0 for _ in range(3)]
-    #         power = len(cset) - 1
-    #         remainder = val
-    #         for power in range(len(cset) - 1, -1, -1):
-    #             bin_val = 2 ** power  # Binary value if current val is 1
-    #             if bin_val <= remainder:
-    #                 v = 255  # Max out the current value
-    #                 cset[power] = v
-    #                 remainder -= bin_val
-    #             if remainder <= 0:
-    #                 break
-    #         return cset
-    #     else:  # Special case for >= 8
-    #         if val >= 8:  # Probably unecessary check
-    #             return (255, 100, 0)  # Orangey color
+    @staticmethod
+    def value_to_rgba(val: int) -> tuple:
+        """
+        Convert cell value to RGBA value. Can support
+        up to value 15, albeit up to value 8 is only
+        useful.
+        Arguments:
+        val - Cell value.
+        Returns:
+        RGB tuple.
+        """
+        if val <= 0 or val > 15:
+            return (90, 90, 90)  # Gray unrevealed
+        elif val <= 7:
+            cset = [0 for _ in range(3)]
+            power = len(cset) - 1
+            remainder = val
+            for power in range(len(cset) - 1, -1, -1):
+                bin_val = 2 ** power  # Binary value if current val is 1
+                if bin_val <= remainder:
+                    v = 255  # Max out the current value
+                    cset[power] = v
+                    remainder -= bin_val
+                if remainder <= 0:
+                    break
+            return cset
+        else:  # Special case for >= 8
+            if val >= 8:  # Probably unecessary check
+                return (255, 100, 0)  # Orangey color
 
     def get_summary(self):
         """
@@ -198,3 +201,11 @@ class Cell(pygame.sprite.Sprite):
         if self.touching == 0 and not self.bomb:
             for neighbor in self.surrounding:
                 neighbor.action(cb)
+
+    def coordinates(self):
+        """
+        Get a tuple of the grid coordinates of this cell.
+        Returns:
+        Tuple coordinates (i, j).
+        """
+        return (self.i, self.j)
