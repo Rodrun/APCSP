@@ -13,6 +13,7 @@ gym = "*"
 "e1839a8" = {editable = true, path = "."}
 theano = "*"
 pillow = "*"
+scipy = "*"
 
 
 [dev-packages]

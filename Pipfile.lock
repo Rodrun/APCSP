@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "21d1f8254af6f1475df21f4f87bc89b24b33f7e9dfd3be0cfa619d78f23b36ca"
+            "sha256": "68a5c9ef9bce444524a84640805b1cadc8abd2df9f6ff7cf494ec95a1acb4f76"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -11,7 +11,7 @@
             "platform_python_implementation": "CPython",
             "platform_release": "10",
             "platform_system": "Windows",
-            "platform_version": "10.0.16299",
+            "platform_version": "10.0.17134",
             "python_full_version": "3.5.2",
             "python_version": "3.5",
             "sys_platform": "win32"
@@ -99,7 +99,7 @@
         },
         "theano": {
             "hashes": [],
-            "version": "==1.0.1"
+            "version": "==1.0.2"
         },
         "urllib3": {
             "hashes": [],

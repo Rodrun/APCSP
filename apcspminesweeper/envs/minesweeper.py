@@ -24,6 +24,7 @@ For every click on a bomb: -2.
 import os
 import argparse
 
+import scipy.misc as smp
 from PIL import Image
 import numpy as np
 import pygame
@@ -81,6 +82,7 @@ class Minesweeper(Env):
         self.end_callbacks = []  # List of callbacks to invoke after game end
         self.after_click = []  # List of callbacks to invoke after a click
         self.revealed_bombs = 0  # Track revealed bombs, when game ends.
+        self.clicks = 0  # Click counter
 
         pygame.init()
         pygame.display.set_caption("Minesweeper")
@@ -117,24 +119,36 @@ class Minesweeper(Env):
         # self.action_space = spaces.Tuple([spaces.Discrete(self.cols),
         #                                   spaces.Discrete(self.rows)])
         self.action_space = spaces.Discrete(self.cols * self.rows)
-        self.observation_space = spaces.Box(low=0,
-                                            high=255,
-                                            shape=(dheight, dwidth, 3))
+        #self.observation_space = spaces.Box(low=0,
+        #                                    high=255,
+        #                                    shape=(dheight, dwidth, 3))
+        self.observation_space = spaces.Box(low=0, high=255,
+                                            shape=(self.rows, self.cols, 3))
 
     TEMP = "TEMP.png"
 
     def _get_obs(self):
         """
-        Get the current observation space. It is an image grab of the grid
+        Get the current observation space. 'mini' image grab of the grid
         surface.
         Returns:
         Updated observation space.
         """
-        obs = np.array(Image.frombytes("RGB",
-                                       self.gameDisplay.get_rect().size,
-                                       self.gameDisplay.get_buffer().raw))
-        print("Observation shape: ", obs.shape)
-        return obs
+        data = np.zeros((self.rows, self.cols, 3), dtype=np.uint8)
+        for j in range(self.rows):
+            for i in range(self.cols):
+                c = self.grid.at(i, j)
+                if not c.revealed:
+                    data[j, i] = 255
+                elif c.bomb:
+                    data[j, i] = 9
+                else:
+                    data[j, i] = c.touching
+        #obs = np.array(Image.frombytes("RGB",
+        #                               self.gameDisplay.get_rect().size,
+        #                               self.gameDisplay.get_buffer().raw))
+        #print("Observation shape: ", obs.shape)
+        return data
 
     # For gym.Env:
     def step(self, action):
@@ -143,7 +157,7 @@ class Minesweeper(Env):
         Returns:
         observation, reward, done, info - Tuple.
         """
-        print(action)
+        #print(action)
         assert self.action_space.contains(action)
         cx, cy = self._get_action_coords(action)
         # Check if cell already revealed
@@ -159,16 +173,19 @@ class Minesweeper(Env):
         if done:
             if self.lost:
                 print("Game lost")
-                reward = -1.0  # Punish lost
+                if self.clicks != 1:
+                    reward = -1.0  # Punish lost
+                else:
+                    reward = 0.1  # First click is random, dont punish
             else:
                 print("Game won")
-                reward = 2.0  # Reward solve
+                reward = 1.0  # Reward solve
         else:
             if c_revealed:  # Cell already clicked
-                reward = -1.0  # Punish uselessness
+                reward = -.5  # Punish uselessness
                 done = True
             else:
-                reward = 1.0  # Reward valid action
+                reward = 0.90  # Reward valid action
 
         observation = self._get_obs()
 #        info = {"remaining": self.remaining,
@@ -297,6 +314,7 @@ class Minesweeper(Env):
         Arguments:
         cell - Cell object action is performed on successfully.
         """
+        self.clicks += 1
         # print(cell)
         if cell.bomb and not cell.flagged:
             self.end_game(True)  # Lose game
@@ -366,7 +384,7 @@ class Minesweeper(Env):
         Returns:
         Generator of integer values of the grid after action.
         """
-        print("Cell click at ", self.grid.at(i, j).coordinates())
+        #print("Cell click at ", self.grid.at(i, j).coordinates())
         self.grid.at(i, j).action(self._after_action)
         return self.get_grid_vals()
 
@@ -375,13 +393,13 @@ class Minesweeper(Env):
         Creates a new Grid object to be used when game is reset.
         """
         self.end = False
-        del self.grid
+        self.clicks = 0
         self.grid = Grid(self.rows, self.cols, self.w,
                          bomb_chance=self.bomb_chance,
                          bomb_limit=self.bomb_limit)
         self.remaining = self.get_total_cells() - self.bomb_limit
-        print("Grid reset. Remaining: ", self.remaining, " ",
-              self.grid.state_str())
+        #print("Grid reset. Remaining: ", self.remaining, " ",
+        #      self.grid.state_str())
         self.update()
         self.draw()
         return self._get_obs()
